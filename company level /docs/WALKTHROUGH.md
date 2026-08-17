@@ -90,6 +90,45 @@ The console utilizes a **persistent vertical left sidebar rail** (256px wide, co
 
 ## Chronological Changelog & Trajectory History
 
+### [2026-08-17] — P3: shadcn Foundation, Semantic Status Tokens & Shared Primitives
+- **Previous State:**
+  - `npm run build` was **failing**: `The 'border-border' class does not exist`. The shadcn init had written CSS variables into `src/index.css` but never registered the matching colour keys in `tailwind.config.js`, so `@apply border-border` in the base layer had nothing to resolve against.
+  - `src/index.css` carried a dead `@import "shadcn/tailwind.css"` — that file does not exist in `node_modules`.
+  - Theme variables were authored in `oklch(...)`, which cannot accept Tailwind's `<alpha-value>` substitution, so every opacity modifier (`bg-muted/50`, `ring-foreground/10`, `ring-ring/50`) used by shadcn components would have silently failed.
+  - `--primary` was set to `oklch(0.205 0 0)` (near-black) under a comment claiming "Tuckit orange accent", disagreeing with `tailwind.config.js` which set `primary` to `#F97316`.
+  - Status pills were a hand-rolled colour `switch` in `components/common/StatusBadge.tsx`, duplicated in intent across 9 pages.
+- **Changes Made:**
+  - Installed 18 shadcn components (`card`, `badge`, `input`, `select`, `table`, `tabs`, `popover`, `sheet`, `dropdown-menu`, `tooltip`, `separator`, `scroll-area`, `skeleton`, `command`, `calendar`, `dialog`, `textarea`, `input-group`).
+  - Rewrote all theme variables as **bare HSL triplets** (`25 95% 53%`) instead of `oklch(...)`, and registered every shadcn semantic key (`background`, `foreground`, `card`, `popover`, `muted`, `accent`, `destructive`, `secondary`, `border`, `input`, `ring`) in `tailwind.config.js` using the `hsl(var(--x) / <alpha-value>)` form. This is what unblocked the build and made opacity modifiers work.
+  - Added a semantic status scale — `success`, `warning`, `danger`, `info`, `neutral`, each with `DEFAULT` / `bg` / `foreground` — in both light and `.dark` blocks.
+  - **Corrected the status foregrounds for WCAG AA.** The conventional Tailwind `-700`-on-`-50` pairings measured 4.36:1 (success), 3.14:1 (warning) and 4.39:1 (neutral) at 12px — all below the 4.5:1 threshold. Darkened `--success-foreground`, `--warning-foreground` and `--neutral-foreground` only; the `--x` accent values (dots, border rails) are unchanged. All five variants now measure 5.5–7.4:1.
+  - Set `--primary` to Tuckit orange (`25 95% 53%` = `#F97316`) so the CSS variable and the Tailwind key finally agree.
+  - Ported `src/components/ui/card.tsx` from Tailwind **v4** syntax (`gap-(--card-spacing)`, `--spacing(4)`) to v3-legal arbitrary values, preserving the CSS-variable spacing behaviour and the public API.
+  - Created `components/ui/status-badge.tsx` as the single source of truth (`STATUS_MAP`), covering all ~30 statuses the app actually renders — booking lifecycle, connectivity, locker state, approvals, alert severity, payment methods. `components/common/StatusBadge.tsx` is now a thin deprecated shim so all 9 existing call sites keep compiling.
+  - Created `components/ui/stat-card.tsx` (`default` / `emphasis` tones with left accent rail) and `components/ui/data-table-cells.tsx` (`CellPrimary`, `CellSecondary`, `CellCode`, `CellAmount`, `CellSensitive`).
+  - Wired the four Dashboard KPI tiles to `StatCard` — `Active lockers` → `emphasis/warning`, `Overdue alerts` → `emphasis/danger`.
+- **Deliberate deviations from the brief:**
+  - Brief specified HSL triplets with `hsl(var(--x))`; the repo was on OKLCH. Went with HSL because OKLCH breaks `<alpha-value>` — the brief's format was correct for this project and the repo's was not.
+  - Brief's `fontFeatureSettings: { tabular: '"tnum"' }` was skipped: it is not a Tailwind v3 theme key and generates nothing. `tabular-nums` is already built in and is what the primitives use.
+  - Brief's `STATUS_MAP` had 5 entries; shipping it verbatim would have turned every offline terminal grey. Populated with the full vocabulary instead.
+  - Brief mapped `OVERDUE` to `danger`; the previous implementation used amber. Followed the brief — overdue is a problem, not a caution.
+- **Known remaining work (NOT done in this pass):**
+  - **Rule 1d (uppercase sweep) is incomplete.** 138 `uppercase` occurrences remain across 39 files; only the Dashboard KPI labels and the `StatusBadge` labels were converted to sentence case.
+  - **17 of the 18 installed shadcn components still emit Tailwind v4 syntax** and will render unstyled under v3. Only `card.tsx` has been ported. Either port them on demand or migrate the project to Tailwind v4.
+  - `data-table-cells.tsx` is built but not yet applied to any table.
+- **Files Modified / Created:**
+  - `company level/src/index.css`
+  - `company level/tailwind.config.js`
+  - `company level/src/components/ui/card.tsx` (ported v4 → v3)
+  - `company level/src/components/ui/status-badge.tsx` (NEW)
+  - `company level/src/components/ui/stat-card.tsx` (NEW)
+  - `company level/src/components/ui/data-table-cells.tsx` (NEW)
+  - `company level/src/components/common/StatusBadge.tsx` (now a deprecated shim)
+  - `company level/src/pages/Dashboard.tsx`
+- **Verification:** `npm run build` passed with 0 errors (990ms) after failing on entry. Token classes confirmed present in the emitted CSS; alpha modifier confirmed compiling to `hsl(var(--foreground) / .1)`; all 5 status variants measured in-browser at ≥5.5:1 contrast.
+
+---
+
 ### [2026-08-17] — P2: Data Integrity, Metrics Honesty & URL-Synced Filter State
 - **Previous State:**
   - Hardcoded static trends (`+14% vs last week`, `+24.8% vs last month`, `↓ -71%`, `+14% QoQ`, `+28% QoQ`) existed on Dashboard, Reports, and DeviceStatus KPI cards.

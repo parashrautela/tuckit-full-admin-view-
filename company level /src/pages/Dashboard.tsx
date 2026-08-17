@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom';
 import { useRealtime } from '../context/RealtimeContext';
 import { Booking } from '../types';
 import { StatusBadge } from '../components/common/StatusBadge';
+import { StatCard } from '@/components/ui/stat-card';
 import { DateRangePicker } from '../components/common/DateRangePicker';
 import { Modal } from '../components/common/Modal';
 import { ForceUnlockModal } from '../components/control-center/ForceUnlockModal';
@@ -298,35 +299,33 @@ export const Dashboard: React.FC = () => {
     <div className="space-y-6">
       {/* Top Banner KPI Summary */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-        <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Total Bookings</div>
-          <div className="text-2xl font-black text-zinc-900 mt-1">{bookings.length}</div>
-          <div className="text-[11px] text-zinc-500 font-medium mt-0.5">All fleet records</div>
-        </div>
+        <StatCard
+          label="Total bookings"
+          value={bookings.length}
+          description="All fleet records"
+        />
 
-        <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Active Lockers</div>
-          <div className="text-2xl font-black text-primary mt-1">
-            {bookings.filter(b => b.bookingStatus === 'ACTIVE').length}
-          </div>
-          <div className="text-[11px] text-zinc-500 font-medium mt-0.5">Occupied in real time</div>
-        </div>
+        <StatCard
+          label="Active lockers"
+          value={bookings.filter(b => b.bookingStatus === 'ACTIVE').length}
+          description="Occupied in real time"
+          tone="emphasis"
+          emphasisColor="warning"
+        />
 
-        <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Retrieved / Done</div>
-          <div className="text-2xl font-black text-zinc-900 mt-1">
-            {bookings.filter(b => b.bookingStatus === 'COMPLETED').length}
-          </div>
-          <div className="text-[11px] text-zinc-500 font-medium mt-0.5">Checked out safely</div>
-        </div>
+        <StatCard
+          label="Retrieved / done"
+          value={bookings.filter(b => b.bookingStatus === 'COMPLETED').length}
+          description="Checked out safely"
+        />
 
-        <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs">
-          <div className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider">Overdue Alerts</div>
-          <div className="text-2xl font-black text-red-600 mt-1">
-            {bookings.filter(b => b.bookingStatus === 'OVERDUE').length}
-          </div>
-          <div className="text-[11px] text-red-600 font-semibold mt-0.5">Excess time accrued</div>
-        </div>
+        <StatCard
+          label="Overdue alerts"
+          value={bookings.filter(b => b.bookingStatus === 'OVERDUE').length}
+          description="Excess time accrued"
+          tone="emphasis"
+          emphasisColor="danger"
+        />
       </div>
 
       {/* Filter Panel */}
