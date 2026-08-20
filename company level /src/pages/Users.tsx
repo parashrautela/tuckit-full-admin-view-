@@ -1,6 +1,24 @@
 import React, { useState } from 'react';
-import { User, Search, ShieldBan, ShieldCheck, Phone, Mail, Calendar, ArrowUpRight } from 'lucide-react';
-import { BlacklistUserModal } from '../components/modals/BlacklistUserModal';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { BlacklistUserModal } from '@/components/modals/BlacklistUserModal';
+import { User, Search, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 interface CustomerUser {
   id: string;
@@ -45,77 +63,102 @@ export const UsersPage: React.FC = () => {
   const filtered = users.filter(u => !search || u.name.toLowerCase().includes(search.toLowerCase()) || u.phone.includes(search) || u.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black text-zinc-900 flex items-center gap-2">
-            <User className="h-5 w-5 text-primary" /> Customer Directory & User Management
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">Search consumer accounts, inspect lifetime usage history, and handle security flags</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Customer Directory & User Management</h1>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Search consumer accounts, inspect lifetime usage history, and handle security flags.
+          </p>
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search user by name, phone, or email..."
-          className="w-full pl-10 pr-4 h-10 bg-white border border-zinc-200 rounded-xl text-xs font-medium outline-none focus:border-primary"
-        />
-      </div>
+      {/* ── Search Bar ── */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search user by name, phone, or email..."
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                <th className="py-3 px-4">USER ID</th>
-                <th className="py-3 px-4">CUSTOMER NAME</th>
-                <th className="py-3 px-4">CONTACT INFO</th>
-                <th className="py-3 px-4">TOTAL BOOKINGS</th>
-                <th className="py-3 px-4">LIFETIME SPENT</th>
-                <th className="py-3 px-4">LAST ACTIVE</th>
-                <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-4 text-right">SECURITY ACTION</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
+      {/* ── Users Table ── */}
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:px-6 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-sm font-bold text-ink">Registered Consumer Profiles ({filtered.length})</CardTitle>
+            <CardDescription className="text-xs text-ink-muted">
+              Lifetime booking profiles across all channels
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>User ID</TableHead>
+                <TableHead>Customer Name</TableHead>
+                <TableHead>Contact Info</TableHead>
+                <TableHead>Total Bookings</TableHead>
+                <TableHead>Lifetime Spent</TableHead>
+                <TableHead>Last Active</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Security Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filtered.map(u => (
-                <tr key={u.id} className="hover:bg-zinc-50 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-zinc-900">{u.id}</td>
-                  <td className="py-3 px-4 font-bold text-zinc-800">{u.name}</td>
-                  <td className="py-3 px-4">
-                    <div className="font-mono text-zinc-700">{u.phone}</div>
-                    <div className="text-[11px] text-zinc-400">{u.email}</div>
-                  </td>
-                  <td className="py-3 px-4 font-bold text-zinc-900">{u.totalBookings}</td>
-                  <td className="py-3 px-4 font-black text-primary">₹{u.totalSpent.toLocaleString()}</td>
-                  <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">{u.lastActive}</td>
-                  <td className="py-3 px-4">
-                    <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${u.status === 'ACTIVE' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'}`}>
+                <TableRow key={u.id}>
+                  <TableCell className="font-mono font-bold text-ink whitespace-nowrap">{u.id}</TableCell>
+                  <TableCell className="font-semibold text-ink whitespace-nowrap">{u.name}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="font-mono text-ink text-xs font-semibold">{u.phone}</div>
+                    <div className="text-[11px] text-ink-subtle">{u.email}</div>
+                  </TableCell>
+                  <TableCell className="font-semibold text-ink">{u.totalBookings}</TableCell>
+                  <TableCell className="font-bold text-primary font-mono whitespace-nowrap">
+                    ₹{u.totalSpent.toLocaleString()}
+                  </TableCell>
+                  <TableCell className="text-ink-muted font-mono text-[11px] whitespace-nowrap">{u.lastActive}</TableCell>
+                  <TableCell>
+                    <Badge variant={u.status === 'ACTIVE' ? 'success' : 'destructive'} size="sm">
                       {u.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button
-                      type="button"
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right whitespace-nowrap">
+                    <Button
+                      variant={u.status === 'ACTIVE' ? 'destructive' : 'outline'}
+                      size="sm"
                       onClick={() => toggleBlacklist(u)}
-                      className={`text-xs font-bold px-2.5 py-1 rounded-lg border transition-colors ${
-                        u.status === 'ACTIVE'
-                          ? 'border-red-200 text-red-600 hover:bg-red-50'
-                          : 'border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-                      }`}
+                      className="h-7 px-2.5 text-xs font-semibold"
                     >
-                      {u.status === 'ACTIVE' ? 'Blacklist User' : 'Remove Flag'}
-                    </button>
-                  </td>
-                </tr>
+                      {u.status === 'ACTIVE' ? (
+                        <>
+                          <ShieldAlert className="size-3" />
+                          <span>Blacklist User</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="size-3 text-emerald-600" />
+                          <span>Remove Flag</span>
+                        </>
+                      )}
+                    </Button>
+                  </TableCell>
+                </TableRow>
               ))}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
 
       <BlacklistUserModal
         isOpen={!!blacklistModalUser}

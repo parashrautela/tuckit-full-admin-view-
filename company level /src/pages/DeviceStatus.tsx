@@ -1,29 +1,44 @@
 import React, { useState, useMemo } from 'react';
-import { useRealtime } from '../context/RealtimeContext';
-import { StatusBadge } from '../components/common/StatusBadge';
-import { PrintQrModal } from '../components/control-center/PrintQrModal';
-import { ScreenCaptureModal } from '../components/control-center/ScreenCaptureModal';
-import { Terminal } from '../types';
+import { useRealtime } from '@/context/RealtimeContext';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { PrintQrModal } from '@/components/control-center/PrintQrModal';
+import { ScreenCaptureModal } from '@/components/control-center/ScreenCaptureModal';
+import { Terminal } from '@/types';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
   MonitorCheck,
   Wifi,
   WifiOff,
   Activity,
-  Zap,
   RefreshCw,
   Search,
   LayoutGrid,
   List,
   Printer,
   Camera,
-  MapPin,
-  Clock,
-  Cpu,
   Signal,
-  TrendingDown,
-  AlertTriangle,
   ChevronLeft,
   ChevronRight,
+  Radio,
+  Network,
 } from 'lucide-react';
 
 export const DeviceStatus: React.FC = () => {
@@ -37,7 +52,6 @@ export const DeviceStatus: React.FC = () => {
     wsConnectedCount,
     connectionDistribution,
     lastCheckedTime,
-    heartbeatTick,
     refreshFeed,
   } = useRealtime();
 
@@ -50,7 +64,6 @@ export const DeviceStatus: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [networkFilter, setNetworkFilter] = useState('ALL');
 
-  // Pagination for fleet scale
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = viewMode === 'grid' ? 24 : 20;
 
@@ -91,427 +104,431 @@ export const DeviceStatus: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-black text-zinc-900 tracking-tight">Terminal Control Center</h1>
-            <span className="px-2.5 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-full uppercase tracking-wider animate-pulse-subtle shadow-sm">
-              LIVE FEED
-            </span>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Terminal Telemetry & Fleet Status</h1>
+            <Badge variant="success" size="sm" className="font-mono">
+              MQTT LIVE FEED
+            </Badge>
           </div>
-          <p className="text-xs text-zinc-500 mt-1">
-            Manage, monitor, and configure active deployed terminal hardware in real time.
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Real-time ping, telemetry, WebSocket state, and remote diagnostics for all deployed kiosks.
           </p>
         </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            variant="default"
+            size="sm"
+            onClick={refreshFeed}
+          >
+            <RefreshCw className="size-3.5" />
+            <span>Poll Telemetry</span>
+          </Button>
+        </div>
       </div>
 
-      {/* 5 KPI Metric Cards */}
+      {/* ── 5 Metric KPI Cards (Clean Monochromatic Palette) ── */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Total Terminals */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-2xs relative overflow-hidden">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <MonitorCheck className="h-3.5 w-3.5 text-zinc-400" />
-            TOTAL TERMINALS
-          </div>
-          <div className="text-3xl font-black text-zinc-900 mt-2">{totalTerminals}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">ALL CONFIGURED</div>
-          <div className="text-[11px] text-emerald-600 font-bold flex items-center gap-1 mt-0.5">
-            <Activity className="h-3 w-3" />
-            {onlineDevices} ONLINE NODES
-          </div>
-          <div className="absolute -bottom-3 -right-3 h-16 w-16 bg-zinc-100 rounded-full opacity-50" />
-        </div>
-
-        {/* Online Devices */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-2xs relative overflow-hidden">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <Wifi className="h-3.5 w-3.5 text-emerald-500" />
-            ONLINE DEVICES
-          </div>
-          <div className="text-3xl font-black text-emerald-600 mt-2">{onlineDevices}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">
-            ONLINE <span className="text-emerald-600 font-black">{onlinePercentage}%</span>
-          </div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
-            WS CONNECTED: <span className="text-zinc-900 font-bold">{wsConnectedCount}</span>
-          </div>
-          <div className="absolute -bottom-3 -right-3 h-16 w-16 bg-emerald-100 rounded-full opacity-50" />
-        </div>
-
-        {/* Offline Devices */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-2xs relative overflow-hidden">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <WifiOff className="h-3.5 w-3.5 text-red-500" />
-            OFFLINE DEVICES
-          </div>
-          <div className="text-3xl font-black text-red-600 mt-2">{offlineDevices}</div>
-          <div className="text-[11px] text-red-600 font-bold mt-1">REQUIRES ATTENTION</div>
-          <div className="text-[11px] text-blue-600 font-bold cursor-pointer hover:underline mt-0.5">
-            CHECK CONNECTION LOGS
-          </div>
-          <div className="absolute -bottom-3 -right-3 h-16 w-16 bg-red-100 rounded-full opacity-50" />
-        </div>
-
-        {/* Connection Types */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-2xs">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <Signal className="h-3.5 w-3.5 text-sky-500" />
-            CONNECTION TYPES
-          </div>
-          <div className="mt-3 space-y-1.5">
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-zinc-600 font-medium">LAN / WS</span>
-              <span className="font-bold text-zinc-900">{connectionDistribution.lan}</span>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Total Nodes</span>
+              <MonitorCheck className="size-3.5 text-zinc-400" />
             </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-zinc-600 font-medium">4G SIM</span>
-              <span className="font-bold text-zinc-900">{connectionDistribution.sim}</span>
-            </div>
-            <div className="flex items-center justify-between text-[11px]">
-              <span className="text-zinc-600 font-medium">WiFi</span>
-              <span className="font-bold text-zinc-900">{connectionDistribution.wifi}</span>
-            </div>
-          </div>
-        </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-1">{totalTerminals}</div>
+            <span className="text-[11px] text-zinc-500">{onlineDevices} configured active</span>
+          </CardContent>
+        </Card>
 
-        {/* Auto-Refresh Feed Status */}
-        <div className="bg-white rounded-2xl border border-zinc-200 p-4 shadow-2xs">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <Activity className="h-3.5 w-3.5 text-primary" />
-            AUTO-REFRESH FEED
-          </div>
-          <div className="flex items-center gap-1.5 mt-2">
-            <span className="h-2 w-2 bg-emerald-500 rounded-full animate-ping" />
-            <span className="text-[11px] font-bold text-emerald-600 uppercase">LIVE SYNCING</span>
-          </div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-1">10s Intervals</div>
-          <div className="text-[11px] text-zinc-500 font-mono mt-0.5">
-            LAST CHECKED: <span className="text-zinc-800 font-bold">{lastCheckedTime}</span>
-          </div>
-          {slowNetCount > 0 && (
-            <div className="text-[11px] text-amber-600 font-bold mt-0.5">
-              {slowNetCount} SLOW NET
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Online Nodes</span>
+              <Wifi className="size-3.5 text-zinc-400" />
             </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-1">{onlineDevices}</div>
+            <span className="text-[11px] text-zinc-500">{onlinePercentage}% network uptime</span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Offline Nodes</span>
+              <WifiOff className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 mt-1">{offlineDevices}</div>
+            <span className="text-[11px] text-zinc-500">Requires attention</span>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Connection Types</span>
+              <Signal className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="flex items-center gap-3 mt-1 text-xs">
+              <div>
+                <span className="text-[10px] text-zinc-400 block">LAN/WS</span>
+                <span className="font-semibold text-zinc-900 font-mono">{connectionDistribution.lan}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-zinc-400 block">4G SIM</span>
+                <span className="font-semibold text-zinc-900 font-mono">{connectionDistribution.sim}</span>
+              </div>
+              <div>
+                <span className="text-[10px] text-zinc-400 block">WiFi</span>
+                <span className="font-semibold text-zinc-900 font-mono">{connectionDistribution.wifi}</span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Sync State</span>
+              <Activity className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="flex items-center gap-1.5 mt-1">
+              <span className="size-1.5 rounded-full bg-emerald-500" />
+              <span className="text-xs font-semibold text-zinc-900">LIVE SYNC</span>
+            </div>
+            <span className="text-[11px] text-zinc-500 font-mono truncate">Checked: {lastCheckedTime}</span>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── State-wise Coverage Section ── */}
+      <div className="flex flex-col gap-3">
+        <div className="flex items-center justify-between">
+          <h2 className="text-xs font-bold text-ink-muted uppercase tracking-wider">
+            Regional Telemetry & State Coverage
+          </h2>
+          {stateFilter !== 'ALL' && (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setStateFilter('ALL')}
+              className="text-xs text-primary"
+            >
+              Clear state filter ({stateFilter})
+            </Button>
           )}
         </div>
-      </div>
 
-      {/* State-wise Terminal Coverage */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-bold text-zinc-900 uppercase tracking-wider">
-          State-Wise Terminal Coverage
-        </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
           {stateCoverage.map(sc => {
             const onlinePct = sc.total > 0 ? Math.round((sc.online / sc.total) * 100) : 0;
+            const isSelected = stateFilter === sc.state;
+
             return (
               <button
                 key={sc.state}
                 type="button"
-                onClick={() => setStateFilter(stateFilter === sc.state ? 'ALL' : sc.state)}
-                className={`relative bg-white rounded-xl border p-3 text-left shadow-2xs hover:shadow-md transition-all overflow-hidden group ${
-                  stateFilter === sc.state
-                    ? 'border-primary ring-1 ring-primary/30 bg-orange-50/30'
-                    : 'border-zinc-200 hover:border-zinc-300'
+                onClick={() => setStateFilter(isSelected ? 'ALL' : sc.state)}
+                className={`flex flex-col gap-2 bg-white rounded-xl border p-3.5 text-left transition-all relative overflow-hidden select-none ${
+                  isSelected
+                    ? 'border-primary ring-1 ring-primary/30 bg-orange-50/20 shadow-2xs'
+                    : 'border-hairline hover:border-zinc-300 shadow-2xs'
                 }`}
               >
-                <div className="text-xs font-bold text-zinc-900 group-hover:text-primary transition-colors truncate">
-                  {sc.state}
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-ink truncate">{sc.state}</span>
+                  <span className="text-xs font-mono font-bold text-ink-muted">{sc.total}</span>
                 </div>
-                <div className="text-lg font-black text-zinc-900 mt-1">{sc.total}</div>
 
-                {/* Progress Bar */}
-                <div className="mt-2 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                {/* Progress track */}
+                <div className="h-1.5 w-full bg-zinc-100 rounded-full overflow-hidden">
                   <div
                     className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                     style={{ width: `${onlinePct}%` }}
                   />
                 </div>
 
-                <div className="flex justify-between mt-1.5 text-[10px] font-bold">
+                <div className="flex justify-between text-[10px] font-semibold">
                   <span className="text-emerald-600">{sc.online} Online</span>
-                  <span className="text-red-500">{sc.offline} Offline</span>
+                  <span className={sc.offline > 0 ? 'text-red-500' : 'text-ink-subtle'}>
+                    {sc.offline} Offline
+                  </span>
                 </div>
-
-                {/* Decorative bg */}
-                <div className="absolute -bottom-4 -right-4 h-14 w-14 rounded-full bg-zinc-50 opacity-60 group-hover:bg-orange-50 transition-colors" />
               </button>
             );
           })}
         </div>
       </div>
 
-      {/* Search + Filters + View Toggle */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs p-4 space-y-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-          {/* Search Bar */}
-          <div className="relative flex-1 max-w-xl">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-            <input
-              type="text"
-              value={searchQuery}
-              onChange={e => setSearchQuery(e.target.value)}
-              placeholder="Search terminals by code, site name, city, state, type...  ⌘ K"
-              className="w-full pl-10 pr-4 h-10 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-medium text-zinc-800 focus:bg-white focus:border-primary outline-none transition-all"
-            />
+      {/* ── Search, Filters & View Toggle ── */}
+      <Card>
+        <CardContent className="p-4 flex flex-col gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+            <div className="relative flex-1 max-w-lg">
+              <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+              <Input
+                type="text"
+                value={searchQuery}
+                onChange={e => setSearchQuery(e.target.value)}
+                placeholder="Search terminals by code, site name, city, state..."
+                className="pl-9"
+              />
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-zinc-100 p-1 rounded-lg border border-hairline shrink-0">
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="h-7 px-2.5 text-xs font-semibold"
+              >
+                <LayoutGrid className="size-3.5" />
+                <span>Grid</span>
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-7 px-2.5 text-xs font-semibold"
+              >
+                <List className="size-3.5" />
+                <span>List</span>
+              </Button>
+            </div>
           </div>
 
-          {/* View Toggle */}
-          <div className="flex rounded-lg border border-zinc-200 bg-zinc-100 p-0.5 shrink-0">
-            <button
-              type="button"
-              onClick={() => setViewMode('grid')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all flex items-center gap-1.5 ${
-                viewMode === 'grid'
-                  ? 'bg-white text-zinc-900 shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+          {/* Filter Dropdowns */}
+          <div className="flex flex-wrap gap-2 pt-2 border-t border-hairline-soft">
+            <select
+              value={stateFilter}
+              onChange={e => setStateFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <LayoutGrid className="h-3.5 w-3.5" />
-              Grid
-            </button>
-            <button
-              type="button"
-              onClick={() => setViewMode('list')}
-              className={`px-3 py-1.5 text-xs font-bold rounded-md transition-all flex items-center gap-1.5 ${
-                viewMode === 'list'
-                  ? 'bg-white text-zinc-900 shadow-sm'
-                  : 'text-zinc-500 hover:text-zinc-700'
-              }`}
+              <option value="ALL">All States</option>
+              {uniqueStates.map(s => (
+                <option key={s} value={s}>{s}</option>
+              ))}
+            </select>
+
+            <select
+              value={cityFilter}
+              onChange={e => setCityFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <List className="h-3.5 w-3.5" />
-              List
-            </button>
+              <option value="ALL">All Cities</option>
+              {uniqueCities.map(c => (
+                <option key={c} value={c}>{c}</option>
+              ))}
+            </select>
+
+            <select
+              value={siteTypeFilter}
+              onChange={e => setSiteTypeFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <option value="ALL">All Site Types</option>
+              <option value="Mall">Mall</option>
+              <option value="Metro">Metro</option>
+              <option value="Railway">Railway</option>
+              <option value="Airport">Airport</option>
+              <option value="Campus">Campus</option>
+              <option value="Temple">Temple</option>
+              <option value="Commercial">Commercial</option>
+            </select>
+
+            <select
+              value={lockerTypeFilter}
+              onChange={e => setLockerTypeFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <option value="ALL">All Locker Types</option>
+              <option value="BAGGAGE">Baggage</option>
+              <option value="MOBILE">Mobile</option>
+              <option value="HYBRID">Hybrid</option>
+            </select>
+
+            <select
+              value={statusFilter}
+              onChange={e => setStatusFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ONLINE">Online</option>
+              <option value="OFFLINE">Offline</option>
+            </select>
+
+            <select
+              value={networkFilter}
+              onChange={e => setNetworkFilter(e.target.value)}
+              className="flex h-8 rounded-md border border-hairline bg-white px-2.5 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+            >
+              <option value="ALL">All Network</option>
+              <option value="LAN">LAN</option>
+              <option value="SIM">SIM</option>
+              <option value="WiFi">WiFi</option>
+              <option value="WS">WS</option>
+            </select>
+
+            <div className="ml-auto text-xs text-ink-muted self-center font-mono">
+              {filteredTerminals.length} of {totalTerminals} nodes
+            </div>
           </div>
+        </CardContent>
+      </Card>
 
-          <button
-            type="button"
-            onClick={refreshFeed}
-            className="flex items-center gap-1.5 px-3 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors shrink-0"
-          >
-            <RefreshCw className="h-3.5 w-3.5" />
-            Sync Now
-          </button>
-        </div>
-
-        {/* Filter Chips */}
-        <div className="flex flex-wrap gap-2">
-          <select
-            value={stateFilter}
-            onChange={e => setStateFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All States</option>
-            {uniqueStates.map(s => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
-
-          <select
-            value={cityFilter}
-            onChange={e => setCityFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All Cities</option>
-            {uniqueCities.map(c => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-
-          <select
-            value={siteTypeFilter}
-            onChange={e => setSiteTypeFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All Site Types</option>
-            <option value="Mall">Mall</option>
-            <option value="Metro">Metro</option>
-            <option value="Railway">Railway</option>
-            <option value="Airport">Airport</option>
-            <option value="Campus">Campus</option>
-            <option value="Temple">Temple</option>
-            <option value="Commercial">Commercial</option>
-          </select>
-
-          <select
-            value={lockerTypeFilter}
-            onChange={e => setLockerTypeFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All Locker Types</option>
-            <option value="BAGGAGE">Baggage</option>
-            <option value="MOBILE">Mobile</option>
-            <option value="HYBRID">Hybrid</option>
-          </select>
-
-          <select
-            value={statusFilter}
-            onChange={e => setStatusFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All Status</option>
-            <option value="ONLINE">Online</option>
-            <option value="OFFLINE">Offline</option>
-          </select>
-
-          <select
-            value={networkFilter}
-            onChange={e => setNetworkFilter(e.target.value)}
-            className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-[11px] font-semibold text-zinc-700"
-          >
-            <option value="ALL">All Network</option>
-            <option value="LAN">LAN</option>
-            <option value="SIM">SIM</option>
-            <option value="WiFi">WiFi</option>
-            <option value="WS">WS</option>
-          </select>
-        </div>
-
-        <div className="text-xs text-zinc-400 font-mono">
-          Showing {filteredTerminals.length} of {totalTerminals} terminals
-        </div>
-      </div>
-
-      {/* Terminal Cards Grid View */}
+      {/* ── Terminal Card Grid or List View ── */}
       {viewMode === 'grid' ? (
-        <div className="space-y-4">
+        <div className="flex flex-col gap-4">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
             {paginatedTerminals.map(t => (
-              <div
-                key={t.id}
-                className="bg-white rounded-xl border border-zinc-200 p-4 shadow-2xs hover:shadow-md transition-all group"
-              >
-                <div className="flex items-center justify-between">
+              <Card key={t.id} className="hover:border-zinc-300 transition-all flex flex-col justify-between">
+                <CardHeader className="p-4 pb-2 flex flex-row items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <MonitorCheck className="h-4 w-4 text-zinc-400 group-hover:text-primary transition-colors" />
-                    <span className="text-xs font-mono font-bold text-zinc-900">{t.code}</span>
+                    <span className="font-mono font-bold text-xs text-ink bg-zinc-100 px-1.5 py-0.5 rounded border border-hairline">
+                      {t.code}
+                    </span>
                   </div>
                   <div className="flex items-center gap-1.5">
                     <StatusBadge status={t.connectivityStatus} pulse={t.connectivityStatus === 'ONLINE'} />
-                    <StatusBadge status={t.lifecycleStatus} />
                   </div>
-                </div>
+                </CardHeader>
 
-                <div className="mt-2.5 text-xs font-semibold text-zinc-700 truncate">{t.siteName}</div>
+                <CardContent className="p-4 pt-1 flex flex-col gap-2.5">
+                  <div>
+                    <h4 className="text-xs font-semibold text-ink truncate">{t.siteName}</h4>
+                    <p className="text-[11px] text-ink-muted truncate">{t.city}, {t.state}</p>
+                  </div>
 
-                <div className="mt-3 space-y-1.5 text-[11px]">
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400 font-medium">Firmware</span>
-                    <span className="text-zinc-800 font-bold font-mono">{t.firmwareVersion}</span>
+                  <div className="grid grid-cols-2 gap-1.5 text-[11px] p-2.5 bg-zinc-50 rounded-lg border border-hairline-soft">
+                    <div>
+                      <span className="text-ink-subtle text-[10px] block uppercase">Network</span>
+                      <span className="font-bold font-mono text-ink">{t.networkType}</span>
+                    </div>
+                    <div>
+                      <span className="text-ink-subtle text-[10px] block uppercase">Firmware</span>
+                      <span className="font-bold font-mono text-ink">{t.firmwareVersion}</span>
+                    </div>
+                    <div>
+                      <span className="text-ink-subtle text-[10px] block uppercase">Hardware</span>
+                      <span className="font-bold text-ink">{t.deviceType}</span>
+                    </div>
+                    <div>
+                      <span className="text-ink-subtle text-[10px] block uppercase">Heartbeat</span>
+                      <span
+                        className={`font-mono font-bold ${
+                          t.heartbeatSecondsAgo < 15
+                            ? 'text-emerald-600'
+                            : t.heartbeatSecondsAgo < 60
+                            ? 'text-amber-600'
+                            : 'text-red-600'
+                        }`}
+                      >
+                        {t.heartbeatSecondsAgo < 60
+                          ? `${t.heartbeatSecondsAgo}s ago`
+                          : `${Math.floor(t.heartbeatSecondsAgo / 60)}m ago`}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400 font-medium">Device Type</span>
-                    <span className="text-zinc-800 font-bold">{t.deviceType}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400 font-medium">Location Pin</span>
-                    <span className="text-zinc-800 font-bold font-mono">{t.locationPin}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-zinc-400 font-medium">Heartbeat</span>
-                    <span
-                      className={`font-bold font-mono ${
-                        t.heartbeatSecondsAgo < 15
-                          ? 'text-emerald-600'
-                          : t.heartbeatSecondsAgo < 60
-                          ? 'text-amber-600'
-                          : 'text-red-600'
-                      }`}
+
+                  <div className="flex items-center justify-between gap-2 pt-1">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setPrintQrTerminal(t)}
+                      className="flex-1 text-[11px]"
                     >
-                      {t.heartbeatSecondsAgo < 60
-                        ? `${t.heartbeatSecondsAgo}s ago`
-                        : `${Math.floor(t.heartbeatSecondsAgo / 60)}m ago`}
-                    </span>
+                      <Printer className="size-3" />
+                      <span>Print QR</span>
+                    </Button>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setCaptureTerminal(t)}
+                      className="flex-1 text-[11px]"
+                    >
+                      <Camera className="size-3" />
+                      <span>Capture</span>
+                    </Button>
                   </div>
-                </div>
-
-                <div className="mt-3 pt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setPrintQrTerminal(t)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-primary hover:text-white text-zinc-700 text-[11px] font-bold rounded-lg transition-colors"
-                  >
-                    <Printer className="h-3 w-3" />
-                    Print QR
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setCaptureTerminal(t)}
-                    className="flex items-center gap-1 px-2.5 py-1.5 bg-zinc-100 hover:bg-zinc-900 hover:text-white text-zinc-700 text-[11px] font-bold rounded-lg transition-colors"
-                  >
-                    <Camera className="h-3 w-3" />
-                    Capture
-                  </button>
-                </div>
-              </div>
+                </CardContent>
+              </Card>
             ))}
           </div>
 
           {/* Grid View Pagination */}
-          <div className="p-4 bg-white rounded-xl border border-zinc-200 flex items-center justify-between text-xs text-zinc-500">
-            <div>
-              Showing <strong>{filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to{' '}
-              <strong>{Math.min(filteredTerminals.length, currentPage * itemsPerPage)}</strong> of{' '}
-              <strong>{filteredTerminals.length}</strong> kiosks
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
+          <div className="p-3 bg-white rounded-xl border border-hairline flex items-center justify-between text-xs text-ink-muted">
+            <span>
+              Showing {filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{' '}
+              {Math.min(filteredTerminals.length, currentPage * itemsPerPage)} of{' '}
+              {filteredTerminals.length} nodes
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="p-1.5 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
               >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-2 font-mono font-bold text-zinc-700">
+                <ChevronLeft className="size-3.5" />
+                <span>Previous</span>
+              </Button>
+              <span className="px-3 py-1 font-mono font-bold text-ink bg-zinc-50 border border-hairline rounded-md">
                 Page {currentPage} of {totalPages}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className="p-1.5 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
               >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                <span>Next</span>
+                <ChevronRight className="size-3.5" />
+              </Button>
             </div>
           </div>
         </div>
       ) : (
-        /* Terminal List View */
-        <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
-          <div className="overflow-x-auto custom-scrollbar">
-            <table className="w-full text-left text-xs">
-              <thead>
-                <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                  <th className="py-3 px-3">CODE</th>
-                  <th className="py-3 px-3">SITE NAME</th>
-                  <th className="py-3 px-3">STATE</th>
-                  <th className="py-3 px-3">CITY</th>
-                  <th className="py-3 px-3">STATUS</th>
-                  <th className="py-3 px-3">NETWORK</th>
-                  <th className="py-3 px-3">FIRMWARE</th>
-                  <th className="py-3 px-3">DEVICE</th>
-                  <th className="py-3 px-3">HEARTBEAT</th>
-                  <th className="py-3 px-3">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-zinc-100">
+        /* Terminal List Table View */
+        <Card className="overflow-hidden">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Code</TableHead>
+                  <TableHead>Site Name</TableHead>
+                  <TableHead>State</TableHead>
+                  <TableHead>City</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Network</TableHead>
+                  <TableHead>Firmware</TableHead>
+                  <TableHead>Device Type</TableHead>
+                  <TableHead>Heartbeat</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
                 {paginatedTerminals.map(t => (
-                  <tr key={t.id} className="hover:bg-zinc-50 transition-colors">
-                    <td className="py-2.5 px-3 font-mono font-bold text-zinc-900">{t.code}</td>
-                    <td className="py-2.5 px-3 text-zinc-700 font-medium max-w-[200px] truncate">{t.siteName}</td>
-                    <td className="py-2.5 px-3 text-zinc-600">{t.state}</td>
-                    <td className="py-2.5 px-3 text-zinc-600">{t.city}</td>
-                    <td className="py-2.5 px-3">
+                  <TableRow key={t.id}>
+                    <TableCell className="font-mono font-bold text-ink whitespace-nowrap">
+                      {t.code}
+                    </TableCell>
+                    <TableCell className="text-ink font-medium max-w-[200px] truncate">
+                      {t.siteName}
+                    </TableCell>
+                    <TableCell className="text-ink-muted">{t.state}</TableCell>
+                    <TableCell className="text-ink-muted">{t.city}</TableCell>
+                    <TableCell>
                       <StatusBadge status={t.connectivityStatus} pulse={t.connectivityStatus === 'ONLINE'} />
-                    </td>
-                    <td className="py-2.5 px-3 font-mono font-bold text-zinc-700">{t.networkType}</td>
-                    <td className="py-2.5 px-3 font-mono text-zinc-600">{t.firmwareVersion}</td>
-                    <td className="py-2.5 px-3 text-zinc-600">{t.deviceType}</td>
-                    <td className="py-2.5 px-3">
+                    </TableCell>
+                    <TableCell className="font-mono font-semibold text-ink">{t.networkType}</TableCell>
+                    <TableCell className="font-mono text-ink-muted">{t.firmwareVersion}</TableCell>
+                    <TableCell className="text-ink-muted">{t.deviceType}</TableCell>
+                    <TableCell>
                       <span
                         className={`font-mono font-bold ${
                           t.heartbeatSecondsAgo < 15
@@ -523,66 +540,68 @@ export const DeviceStatus: React.FC = () => {
                       >
                         {t.heartbeatSecondsAgo < 60 ? `${t.heartbeatSecondsAgo}s` : `${Math.floor(t.heartbeatSecondsAgo / 60)}m`}
                       </span>
-                    </td>
-                    <td className="py-2.5 px-3">
-                      <div className="flex gap-1.5">
-                        <button
-                          type="button"
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex items-center justify-center gap-1">
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => setPrintQrTerminal(t)}
-                          className="p-1.5 text-zinc-500 hover:text-primary hover:bg-orange-50 rounded-md transition-colors"
                           title="Print QR"
                         >
-                          <Printer className="h-3.5 w-3.5" />
-                        </button>
-                        <button
-                          type="button"
+                          <Printer className="size-3.5" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => setCaptureTerminal(t)}
-                          className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
-                          title="Capture"
+                          title="Screen Capture"
                         >
-                          <Camera className="h-3.5 w-3.5" />
-                        </button>
+                          <Camera className="size-3.5" />
+                        </Button>
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))}
-              </tbody>
-            </table>
+              </TableBody>
+            </Table>
           </div>
 
-          {/* List View Pagination */}
-          <div className="p-4 border-t border-zinc-100 flex items-center justify-between text-xs text-zinc-500">
-            <div>
-              Showing <strong>{filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong> to{' '}
-              <strong>{Math.min(filteredTerminals.length, currentPage * itemsPerPage)}</strong> of{' '}
-              <strong>{filteredTerminals.length}</strong> kiosks
-            </div>
-            <div className="flex items-center gap-1.5">
-              <button
-                type="button"
+          <div className="p-3 sm:px-6 border-t border-hairline-soft flex items-center justify-between bg-zinc-50/50">
+            <span className="text-xs text-ink-muted">
+              Showing {filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0} to{' '}
+              {Math.min(filteredTerminals.length, currentPage * itemsPerPage)} of{' '}
+              {filteredTerminals.length} nodes
+            </span>
+
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                className="p-1.5 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
               >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <span className="px-2 font-mono font-bold text-zinc-700">
+                <ChevronLeft className="size-3.5" />
+                <span>Previous</span>
+              </Button>
+              <span className="px-3 py-1 font-mono font-bold text-ink bg-white border border-hairline rounded-md text-xs">
                 Page {currentPage} of {totalPages}
               </span>
-              <button
-                type="button"
+              <Button
+                variant="outline"
+                size="sm"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                className="p-1.5 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
               >
-                <ChevronRight className="h-4 w-4" />
-              </button>
+                <span>Next</span>
+                <ChevronRight className="size-3.5" />
+              </Button>
             </div>
           </div>
-        </div>
+        </Card>
       )}
 
-      {/* Modals */}
+      {/* ── Modals ── */}
       <PrintQrModal isOpen={!!printQrTerminal} onClose={() => setPrintQrTerminal(null)} terminal={printQrTerminal} />
       <ScreenCaptureModal isOpen={!!captureTerminal} onClose={() => setCaptureTerminal(null)} terminal={captureTerminal} />
     </div>

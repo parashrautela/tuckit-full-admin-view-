@@ -1,13 +1,22 @@
 import React, { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useRealtime } from '../context/RealtimeContext';
-import { Modal } from '../components/common/Modal';
+import { useRealtime } from '@/context/RealtimeContext';
+import { Modal } from '@/components/common/Modal';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
 import {
   BarChart3,
   Calendar,
   Download,
   FileSpreadsheet,
-  FileText,
   RotateCcw,
   RefreshCw,
   TrendingUp,
@@ -15,14 +24,8 @@ import {
   IndianRupee,
   Layers,
   ArrowDownToLine,
-  CheckCircle2,
-  SlidersHorizontal,
-  ChevronRight,
-  Building,
-  MapPin,
   Monitor,
   ShieldCheck,
-  Check,
   Smartphone,
   Globe,
   MessageSquare,
@@ -241,20 +244,15 @@ export const Reports: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header & Global Report Scope Filter */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs p-5 space-y-4">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-zinc-900 rounded-xl text-white">
-              <BarChart3 className="h-6 w-6 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-black text-zinc-900 tracking-tight">Report Analysis</h1>
-              <p className="text-xs text-zinc-500">
-                Executive business intelligence and professional data exports.
-              </p>
-            </div>
+    <div className="flex flex-col gap-6 font-sans">
+      {/* ── Header & Global Report Scope Filter ── */}
+      <Card>
+        <CardContent className="p-4 sm:p-5 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div>
+            <h1 className="text-xl font-bold tracking-tight text-zinc-900">Reports & Financial Analytics</h1>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Executive business intelligence, revenue realizations, and audit-ready data exports.
+            </p>
           </div>
 
           <div className="flex flex-wrap items-center gap-2.5">
@@ -262,7 +260,7 @@ export const Reports: React.FC = () => {
             <select
               value={selectedState}
               onChange={e => setSelectedState(e.target.value)}
-              className="h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:bg-white focus:border-primary"
+              className="flex h-9 rounded-md border border-zinc-200 bg-white px-3 py-1 text-xs text-zinc-800 shadow-xs focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-zinc-950 font-medium"
             >
               <option value="ALL">All States (National)</option>
               {uniqueStates.map(s => (
@@ -271,470 +269,477 @@ export const Reports: React.FC = () => {
             </select>
 
             {/* Date Scope */}
-            <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-xl p-1 text-xs">
+            <div className="flex items-center gap-1.5 bg-zinc-50 border border-zinc-200 rounded-md p-1 text-xs">
               <input
                 type="date"
                 value={startDate}
                 onChange={e => setStartDate(e.target.value)}
-                className="bg-transparent px-2 py-1 outline-none text-xs font-medium font-mono text-zinc-700"
+                className="bg-transparent px-2 py-0.5 outline-none text-xs font-mono text-zinc-800"
               />
-              <span className="text-zinc-400 font-bold">to</span>
+              <span className="text-zinc-400 font-medium text-[11px]">to</span>
               <input
                 type="date"
                 value={endDate}
                 onChange={e => setEndDate(e.target.value)}
-                className="bg-transparent px-2 py-1 outline-none text-xs font-medium font-mono text-zinc-700"
+                className="bg-transparent px-2 py-0.5 outline-none text-xs font-mono text-zinc-800"
               />
             </div>
 
-            {/* Refresh Button */}
-            <button
-              type="button"
+            {/* Sync Button */}
+            <Button
+              variant="default"
+              size="sm"
               onClick={handleRefresh}
               disabled={isRefreshing}
-              className="flex items-center gap-2 px-4 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-xl transition-all shadow-sm"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium"
             >
-              <RefreshCw className={`h-3.5 w-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`size-3.5 mr-1.5 ${isRefreshing ? 'animate-spin' : ''}`} />
               <span>Sync: {lastRefreshed}</span>
-            </button>
+            </Button>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* 5 Executive KPI Summary Cards */}
+      {/* ── 5 Executive KPI Summary Cards (Clean, Consistent Monochromatic Palette) ── */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
-        {/* Net Revenue */}
-        <div className="bg-white p-4 rounded-xl border border-zinc-200 shadow-2xs hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <IndianRupee className="h-3.5 w-3.5 text-primary" /> Net Revenue
-          </div>
-          <div className="text-2xl font-black text-zinc-900 mt-2">₹{netRevenue.toLocaleString()}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">Realized revenue</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Post-refund realized revenue</div>
-        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Net Revenue</span>
+              <IndianRupee className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl font-bold tracking-tight text-zinc-900 mt-1">₹{netRevenue.toLocaleString()}</div>
+            <span className="text-[11px] text-zinc-500">Post-refund realized</span>
+          </CardContent>
+        </Card>
 
-        {/* Success Count */}
-        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-2xs hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <CreditCard className="h-3.5 w-3.5 text-emerald-500" /> Success Count
-          </div>
-          <div className="text-2xl font-black text-emerald-600 mt-2">{totalTransactions}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">Paid transactions</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Total successful deposits</div>
-        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Success Count</span>
+              <CreditCard className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl font-bold tracking-tight text-zinc-900 mt-1">{totalTransactions}</div>
+            <span className="text-[11px] text-zinc-500">Successful deposits</span>
+          </CardContent>
+        </Card>
 
-        {/* Total Refund */}
-        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-2xs hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <RotateCcw className="h-3.5 w-3.5 text-red-500" /> Total Refund
-          </div>
-          <div className="text-2xl font-black text-red-600 mt-2">₹{totalRefundAmount.toLocaleString()}</div>
-          <div className="text-[11px] text-red-600 font-semibold mt-1">1.8% of gross volume</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Disbursed transaction returns</div>
-        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Total Refund</span>
+              <RotateCcw className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl font-bold tracking-tight text-zinc-900 mt-1">₹{totalRefundAmount.toLocaleString()}</div>
+            <span className="text-[11px] text-zinc-500">1.8% of gross volume</span>
+          </CardContent>
+        </Card>
 
-        {/* Refund Count */}
-        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-2xs hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <ShieldCheck className="h-3.5 w-3.5 text-amber-500" /> Refund Count
-          </div>
-          <div className="text-2xl font-black text-zinc-900 mt-2">{refundCount}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">Resolved claims</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Total customer claims</div>
-        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Refund Count</span>
+              <ShieldCheck className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl font-bold tracking-tight text-zinc-900 mt-1">{refundCount}</div>
+            <span className="text-[11px] text-zinc-500">Resolved claims</span>
+          </CardContent>
+        </Card>
 
-        {/* Manual Revenue */}
-        <div className="bg-white p-4 rounded-2xl border border-zinc-200 shadow-2xs hover:shadow-md transition-all">
-          <div className="flex items-center gap-2 text-[10px] font-black text-zinc-400 uppercase tracking-wider">
-            <Layers className="h-3.5 w-3.5 text-sky-500" /> Manual Rev.
-          </div>
-          <div className="text-2xl font-black text-zinc-900 mt-2">₹{manualRevenue.toLocaleString()}</div>
-          <div className="text-[11px] text-zinc-500 font-semibold mt-1">Cash desk & OTC</div>
-          <div className="text-[10px] text-zinc-400 mt-0.5">Physical cash intake</div>
-        </div>
+        <Card>
+          <CardContent className="p-4 flex flex-col gap-1">
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider">Manual Rev.</span>
+              <Layers className="size-3.5 text-zinc-400" />
+            </div>
+            <div className="text-2xl font-bold tracking-tight text-zinc-900 mt-1">₹{manualRevenue.toLocaleString()}</div>
+            <span className="text-[11px] text-zinc-500">Cash desk & OTC</span>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Booking Source Share Visual Analytics */}
+      {/* ── Booking Channel Share & Adoption Trends ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Source Share (Current Period) */}
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+        {/* Source Share */}
+        <Card>
+          <CardHeader className="p-4 pb-2 border-b border-zinc-100 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <BarChart3 className="h-4 w-4 text-primary" />
-              <h3 className="text-sm font-bold text-zinc-900">Booking Source Distribution</h3>
+              <BarChart3 className="size-4 text-zinc-700" />
+              <CardTitle className="text-sm font-semibold text-zinc-900">Booking Channel Distribution</CardTitle>
             </div>
-            <span className="text-[11px] font-bold text-zinc-400 uppercase">Current Period</span>
-          </div>
+            <Badge variant="outline" size="sm" className="text-zinc-500 font-normal">Current Period</Badge>
+          </CardHeader>
 
-          <div className="space-y-3.5 pt-1">
+          <CardContent className="p-4 pt-3 flex flex-col gap-3">
             {sourceStats.map(s => (
-              <div key={s.name} className="space-y-1">
-                <div className="flex items-center justify-between text-xs font-semibold">
+              <div key={s.name} className="flex flex-col gap-1">
+                <div className="flex items-center justify-between text-xs font-medium">
                   <span className="text-zinc-700 flex items-center gap-2">
-                    {s.name === 'Touchscreen' && <Monitor className="h-3.5 w-3.5 text-zinc-500" />}
-                    {s.name === 'Web' && <Globe className="h-3.5 w-3.5 text-zinc-500" />}
-                    {s.name === 'Mobile App' && <Smartphone className="h-3.5 w-3.5 text-zinc-500" />}
-                    {s.name === 'WhatsApp' && <MessageSquare className="h-3.5 w-3.5 text-zinc-500" />}
-                    {s.name === 'Offline Payment / QR' && <QrCode className="h-3.5 w-3.5 text-zinc-500" />}
+                    {s.name === 'Touchscreen' && <Monitor className="size-3.5 text-zinc-400" />}
+                    {s.name === 'Web' && <Globe className="size-3.5 text-zinc-400" />}
+                    {s.name === 'Mobile App' && <Smartphone className="size-3.5 text-zinc-400" />}
+                    {s.name === 'WhatsApp' && <MessageSquare className="size-3.5 text-zinc-400" />}
+                    {s.name === 'Offline Payment / QR' && <QrCode className="size-3.5 text-zinc-400" />}
                     {s.name}
                   </span>
-                  <span className="font-mono text-zinc-900">
-                    {s.count} bookings ({s.pct}%)
+                  <span className="font-mono text-zinc-900 font-semibold">
+                    {s.count} ({s.pct}%)
                   </span>
                 </div>
-                <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
+                <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
                   <div
-                    className={`h-full rounded-full transition-all duration-500 ${
-                      s.name === 'Touchscreen'
-                        ? 'bg-primary'
-                        : s.name === 'Mobile App'
-                        ? 'bg-emerald-500'
-                        : s.name === 'Web'
-                        ? 'bg-sky-500'
-                        : s.name === 'WhatsApp'
-                        ? 'bg-green-600'
-                        : 'bg-purple-500'
-                    }`}
+                    className="h-full rounded-full bg-zinc-900 transition-all duration-500"
                     style={{ width: `${s.pct}%` }}
                   />
                 </div>
               </div>
             ))}
-          </div>
-        </div>
+          </CardContent>
+        </Card>
 
-        {/* Monthly Source Share Trend */}
-        <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs p-5 space-y-4">
-          <div className="flex items-center justify-between border-b border-zinc-100 pb-3">
+        {/* Adoption Trends */}
+        <Card>
+          <CardHeader className="p-4 pb-2 border-b border-zinc-100 flex flex-row items-center justify-between">
             <div className="flex items-center gap-2">
-              <TrendingUp className="h-4 w-4 text-emerald-600" />
-              <h3 className="text-sm font-bold text-zinc-900">Channel Growth & Adoption Trends</h3>
+              <TrendingUp className="size-4 text-zinc-700" />
+              <CardTitle className="text-sm font-semibold text-zinc-900">Channel Growth & Insight</CardTitle>
             </div>
-            <span className="text-[11px] font-bold text-emerald-600">6-Month Trend</span>
-          </div>
+            <Badge variant="outline" size="sm" className="text-zinc-500 font-normal">6-Month Trend</Badge>
+          </CardHeader>
 
-          <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100 text-center">
-              <div className="text-xs text-zinc-400 font-bold uppercase">Touchscreen</div>
-              <div className="text-lg font-black text-zinc-900 mt-1">68.4%</div>
-              <div className="text-[10px] text-zinc-500 mt-0.5">Primary Kiosk UI</div>
-            </div>
-            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100 text-center">
-              <div className="text-xs text-zinc-400 font-bold uppercase">Mobile App</div>
-              <div className="text-lg font-black text-emerald-600 mt-1">19.2%</div>
-              <div className="text-[10px] text-zinc-500 font-semibold mt-0.5">iOS & Android App</div>
-            </div>
-            <div className="p-3 bg-zinc-50 rounded-xl border border-zinc-100 text-center">
-              <div className="text-xs text-zinc-400 font-bold uppercase">WhatsApp Bot</div>
-              <div className="text-lg font-black text-green-600 mt-1">12.4%</div>
-              <div className="text-[10px] text-zinc-500 font-semibold mt-0.5">Automated Booking</div>
-            </div>
-          </div>
-
-          <p className="text-xs text-zinc-500 leading-relaxed bg-orange-50/50 p-3 rounded-xl border border-orange-100">
-            <strong>Executive Insight:</strong> App and WhatsApp adoption rates grew by 32% across Tier-1 airports and metro stations in Q3, reducing kiosk touch latency by 45 seconds per check-in.
-          </p>
-        </div>
-      </div>
-
-      {/* Export Control Center Header */}
-      <div className="flex items-center gap-3 pt-2">
-        <div className="p-2 bg-zinc-900 rounded-xl text-white">
-          <ArrowDownToLine className="h-5 w-5" />
-        </div>
-        <div>
-          <h2 className="text-lg font-black text-zinc-900">Export Control Center</h2>
-          <p className="text-xs text-zinc-500">
-            Generate high-fidelity reports for auditing, compliance, and regional tracking.
-          </p>
-        </div>
-      </div>
-
-      {/* 4 Dedicated Export Cards */}
-      <div className="grid grid-cols-1 gap-4">
-        {/* Card 1: Daily Transaction Report */}
-        <div className="bg-white rounded-2xl border border-zinc-200 border-l-4 border-l-blue-500 shadow-2xs p-5 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl shrink-0 mt-1">
-              <FileSpreadsheet className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-zinc-900">Daily Transaction Report</h3>
-              <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
-                Full itemized record of all successful payments, extensions, and refunds for a single day.
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="date"
-                  value={dailyDate}
-                  onChange={e => setDailyDate(e.target.value)}
-                  className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-mono font-bold text-zinc-800 outline-none focus:border-primary"
-                />
-                <span className="text-[11px] text-zinc-400 font-medium">Selected Date</span>
+          <CardContent className="p-4 pt-3 flex flex-col gap-3">
+            <div className="grid grid-cols-3 gap-3">
+              <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200/80 text-center">
+                <div className="text-[10px] text-zinc-500 font-semibold uppercase">Touchscreen</div>
+                <div className="text-lg font-bold text-zinc-900 mt-1">68.4%</div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">Primary Kiosk UI</div>
+              </div>
+              <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200/80 text-center">
+                <div className="text-[10px] text-zinc-500 font-semibold uppercase">Mobile App</div>
+                <div className="text-lg font-bold text-zinc-900 mt-1">19.2%</div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">iOS & Android</div>
+              </div>
+              <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200/80 text-center">
+                <div className="text-[10px] text-zinc-500 font-semibold uppercase">WhatsApp Bot</div>
+                <div className="text-lg font-bold text-zinc-900 mt-1">12.4%</div>
+                <div className="text-[10px] text-zinc-400 mt-0.5">Auto Check-in</div>
               </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => openExportModal('daily', 'Daily Transaction Report')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0 self-start md:self-center"
-          >
-            <Download className="h-4 w-4" /> Download Data
-          </button>
+            <p className="text-xs text-zinc-600 leading-relaxed bg-zinc-50 p-3 rounded-lg border border-zinc-200/80">
+              <strong className="text-zinc-900 font-semibold">Executive Insight:</strong> App and WhatsApp adoption rates grew by 32% across Tier-1 airports and metro stations in Q3, reducing kiosk touch latency by 45 seconds per check-in.
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* ── Export Control Center Section ── */}
+      <div className="flex items-center gap-2 pt-2">
+        <ArrowDownToLine className="size-4 text-zinc-700" />
+        <div>
+          <h2 className="text-sm font-semibold text-zinc-900">Export Control Center</h2>
+          <p className="text-xs text-zinc-500">
+            Generate itemized XLSX/CSV records for regional compliance, daily cash closing, and tax reporting.
+          </p>
         </div>
+      </div>
+
+      {/* 4 Dedicated Export Cards (Consistent, Clean Neutral Cards) */}
+      <div className="grid grid-cols-1 gap-3.5">
+        {/* Card 1: Daily Transaction Report */}
+        <Card>
+          <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-zinc-100 text-zinc-700 rounded-lg shrink-0 mt-0.5">
+                <FileSpreadsheet className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">Daily Transaction Itemized Report</h3>
+                <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
+                  Full itemized record of all successful payments, extensions, and refunds for a single day.
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="date"
+                    value={dailyDate}
+                    onChange={e => setDailyDate(e.target.value)}
+                    className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-mono font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  />
+                  <span className="text-[11px] text-zinc-400">Selected Date</span>
+                </div>
+              </div>
+            </div>
+
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => openExportModal('daily', 'Daily Transaction Report')}
+              className="bg-zinc-900 hover:bg-zinc-800 text-white shrink-0 self-start md:self-center font-medium"
+            >
+              <Download className="size-3.5 mr-1.5" />
+              <span>Configure & Export</span>
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Card 2: Monthly Financial Summary */}
-        <div className="bg-white rounded-2xl border border-zinc-200 border-l-4 border-l-indigo-500 shadow-2xs p-5 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-indigo-50 text-indigo-600 rounded-2xl shrink-0 mt-1">
-              <Calendar className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-zinc-900">Monthly Financial Summary</h3>
-              <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
-                Consolidated transaction logs grouped by state. Essential for monthly accounts and tax auditing.
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <select
-                  value={monthlyMonth}
-                  onChange={e => setMonthlyMonth(e.target.value)}
-                  className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 outline-none focus:border-primary"
-                >
-                  <option value="01">January</option>
-                  <option value="02">February</option>
-                  <option value="03">March</option>
-                  <option value="04">April</option>
-                  <option value="05">May</option>
-                  <option value="06">June</option>
-                  <option value="07">July</option>
-                  <option value="08">August</option>
-                  <option value="09">September</option>
-                  <option value="10">October</option>
-                  <option value="11">November</option>
-                  <option value="12">December</option>
-                </select>
-                <select
-                  value={monthlyYear}
-                  onChange={e => setMonthlyYear(e.target.value)}
-                  className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-bold text-zinc-800 outline-none focus:border-primary"
-                >
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                </select>
+        <Card>
+          <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-zinc-100 text-zinc-700 rounded-lg shrink-0 mt-0.5">
+                <Calendar className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">Monthly Financial & State Tax Summary</h3>
+                <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
+                  Consolidated transaction logs grouped by state. Essential for monthly accounts and tax auditing.
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <select
+                    value={monthlyMonth}
+                    onChange={e => setMonthlyMonth(e.target.value)}
+                    className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  >
+                    <option value="01">January</option>
+                    <option value="02">February</option>
+                    <option value="03">March</option>
+                    <option value="04">April</option>
+                    <option value="05">May</option>
+                    <option value="06">June</option>
+                    <option value="07">July</option>
+                    <option value="08">August</option>
+                    <option value="09">September</option>
+                    <option value="10">October</option>
+                    <option value="11">November</option>
+                    <option value="12">December</option>
+                  </select>
+                  <select
+                    value={monthlyYear}
+                    onChange={e => setMonthlyYear(e.target.value)}
+                    className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  >
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
               </div>
             </div>
-          </div>
 
-          <button
-            type="button"
-            onClick={() => openExportModal('monthly', 'Monthly Financial Summary')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0 self-start md:self-center"
-          >
-            <Download className="h-4 w-4" /> Download Data
-          </button>
-        </div>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => openExportModal('monthly', 'Monthly Financial Summary')}
+              className="bg-zinc-900 hover:bg-zinc-800 text-white shrink-0 self-start md:self-center font-medium"
+            >
+              <Download className="size-3.5 mr-1.5" />
+              <span>Configure & Export</span>
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Card 3: Cancellation Audit Log */}
-        <div className="bg-white rounded-2xl border border-zinc-200 border-l-4 border-l-orange-500 shadow-2xs p-5 hover:shadow-md transition-all flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-orange-50 text-primary rounded-2xl shrink-0 mt-1">
-              <RotateCcw className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-zinc-900">Cancellation Audit Log</h3>
-              <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
-                Security-focused summary of manually and automatically cancelled bookings for the selected date.
-              </p>
-              <div className="flex items-center gap-2 mt-2">
-                <input
-                  type="date"
-                  value={cancellationDate}
-                  onChange={e => setCancellationDate(e.target.value)}
-                  className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-mono font-bold text-zinc-800 outline-none focus:border-primary"
-                />
+        <Card>
+          <CardContent className="p-4 sm:p-5 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-zinc-100 text-zinc-700 rounded-lg shrink-0 mt-0.5">
+                <RotateCcw className="size-5" />
               </div>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => openExportModal('cancellation', 'Cancellation Audit Log')}
-            className="flex items-center gap-2 px-4 py-2.5 bg-primary hover:bg-orange-600 text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0 self-start md:self-center"
-          >
-            <Download className="h-4 w-4" /> Download Data
-          </button>
-        </div>
-
-        {/* Card 4: Terminal-Wise Monthly Invoice Report (Full Cascade) */}
-        <div className="bg-white rounded-2xl border border-zinc-200 border-l-4 border-l-emerald-500 shadow-2xs p-5 hover:shadow-md transition-all space-y-4">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl shrink-0 mt-1">
-              <Monitor className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-sm font-black text-zinc-900">Terminal-Wise Monthly Invoice Report</h3>
-              <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
-                Download a detailed financial summary for a specific terminal, with searchable State, City, and Terminal filtering.
-              </p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-2 border-t border-zinc-100">
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                State
-              </label>
-              <select
-                value={twState}
-                onChange={e => {
-                  setTwState(e.target.value);
-                  setTwCity('');
-                  setTwTerminalId('');
-                }}
-                className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-primary"
-              >
-                <option value="">Select State</option>
-                {uniqueStates.map(s => (
-                  <option key={s} value={s}>{s}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                City
-              </label>
-              <select
-                value={twCity}
-                disabled={!twState}
-                onChange={e => {
-                  setTwCity(e.target.value);
-                  setTwTerminalId('');
-                }}
-                className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-primary disabled:opacity-50"
-              >
-                <option value="">Select City</option>
-                {twAvailableCities.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                Terminal Code
-              </label>
-              <select
-                value={twTerminalId}
-                onChange={e => setTwTerminalId(e.target.value)}
-                className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono font-bold text-zinc-800 outline-none focus:border-primary"
-              >
-                <option value="">Select Terminal ({twAvailableTerminals.length} Available)</option>
-                {twAvailableTerminals.map(t => (
-                  <option key={t.id} value={t.code}>
-                    {t.code} — {t.siteName}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[10px] font-bold text-zinc-400 uppercase tracking-wider mb-1">
-                Month & Year
-              </label>
-              <div className="flex gap-1.5">
-                <select
-                  value={twMonth}
-                  onChange={e => setTwMonth(e.target.value)}
-                  className="flex-1 h-9 px-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-800 outline-none focus:border-primary"
-                >
-                  <option value="01">Jan</option>
-                  <option value="02">Feb</option>
-                  <option value="03">Mar</option>
-                  <option value="04">Apr</option>
-                  <option value="05">May</option>
-                  <option value="06">Jun</option>
-                  <option value="07">Jul</option>
-                  <option value="08">Aug</option>
-                  <option value="09">Sep</option>
-                  <option value="10">Oct</option>
-                  <option value="11">Nov</option>
-                  <option value="12">Dec</option>
-                </select>
-                <select
-                  value={twYear}
-                  onChange={e => setTwYear(e.target.value)}
-                  className="h-9 px-2 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-bold text-zinc-800 outline-none focus:border-primary"
-                >
-                  <option value="2026">2026</option>
-                  <option value="2025">2025</option>
-                  <option value="2024">2024</option>
-                </select>
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">Cancellation & Refund Audit Log</h3>
+                <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
+                  Security-focused summary of manually and automatically cancelled bookings for the selected date.
+                </p>
+                <div className="flex items-center gap-2 mt-2">
+                  <input
+                    type="date"
+                    value={cancellationDate}
+                    onChange={e => setCancellationDate(e.target.value)}
+                    className="h-8 px-2.5 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-mono font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  />
+                </div>
               </div>
             </div>
 
-            <div className="flex items-end">
-              <button
-                type="button"
-                onClick={handleTerminalReportDownload}
-                disabled={isDownloadingTw}
-                className="w-full h-9 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5 disabled:opacity-50"
-              >
-                <Download className="h-3.5 w-3.5" />
-                <span>{isDownloadingTw ? 'Downloading...' : 'Download Report'}</span>
-              </button>
+            <Button
+              variant="default"
+              size="sm"
+              onClick={() => openExportModal('cancellation', 'Cancellation Audit Log')}
+              className="bg-zinc-900 hover:bg-zinc-800 text-white shrink-0 self-start md:self-center font-medium"
+            >
+              <Download className="size-3.5 mr-1.5" />
+              <span>Configure & Export</span>
+            </Button>
+          </CardContent>
+        </Card>
+
+        {/* Card 4: Terminal-Wise Monthly Invoice Report */}
+        <Card>
+          <CardContent className="p-4 sm:p-5 flex flex-col gap-4">
+            <div className="flex items-start gap-3.5">
+              <div className="p-2.5 bg-zinc-100 text-zinc-700 rounded-lg shrink-0 mt-0.5">
+                <Monitor className="size-5" />
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-zinc-900">Terminal-Wise Monthly Invoice Report</h3>
+                <p className="text-xs text-zinc-500 mt-0.5 max-w-xl">
+                  Download a detailed financial summary for a specific terminal node with State, City, and Terminal filtering.
+                </p>
+              </div>
             </div>
-          </div>
-        </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3 pt-3 border-t border-zinc-100">
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
+                  State
+                </label>
+                <select
+                  value={twState}
+                  onChange={e => {
+                    setTwState(e.target.value);
+                    setTwCity('');
+                    setTwTerminalId('');
+                  }}
+                  className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                >
+                  <option value="">Select State</option>
+                  {uniqueStates.map(s => (
+                    <option key={s} value={s}>{s}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
+                  City
+                </label>
+                <select
+                  value={twCity}
+                  disabled={!twState}
+                  onChange={e => {
+                    setTwCity(e.target.value);
+                    setTwTerminalId('');
+                  }}
+                  className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950 disabled:opacity-50"
+                >
+                  <option value="">Select City</option>
+                  {twAvailableCities.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
+                  Terminal Code
+                </label>
+                <select
+                  value={twTerminalId}
+                  onChange={e => setTwTerminalId(e.target.value)}
+                  className="w-full h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-mono font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                >
+                  <option value="">Select Terminal ({twAvailableTerminals.length} Available)</option>
+                  {twAvailableTerminals.map(t => (
+                    <option key={t.id} value={t.code}>
+                      {t.code} — {t.siteName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-semibold text-zinc-500 uppercase tracking-wider mb-1">
+                  Month & Year
+                </label>
+                <div className="flex gap-1.5">
+                  <select
+                    value={twMonth}
+                    onChange={e => setTwMonth(e.target.value)}
+                    className="flex-1 h-9 px-2 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  >
+                    <option value="01">Jan</option>
+                    <option value="02">Feb</option>
+                    <option value="03">Mar</option>
+                    <option value="04">Apr</option>
+                    <option value="05">May</option>
+                    <option value="06">Jun</option>
+                    <option value="07">Jul</option>
+                    <option value="08">Aug</option>
+                    <option value="09">Sep</option>
+                    <option value="10">Oct</option>
+                    <option value="11">Nov</option>
+                    <option value="12">Dec</option>
+                  </select>
+                  <select
+                    value={twYear}
+                    onChange={e => setTwYear(e.target.value)}
+                    className="h-9 px-2 bg-zinc-50 border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
+                  >
+                    <option value="2026">2026</option>
+                    <option value="2025">2025</option>
+                    <option value="2024">2024</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-end">
+                <Button
+                  variant="default"
+                  onClick={handleTerminalReportDownload}
+                  disabled={isDownloadingTw}
+                  className="w-full bg-zinc-900 hover:bg-zinc-800 text-white font-medium"
+                >
+                  <Download className="size-3.5 mr-1.5" />
+                  <span>{isDownloadingTw ? 'Downloading...' : 'Download Report'}</span>
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Column Customization Modal */}
+      {/* ── Column Customization Modal ── */}
       <Modal
         isOpen={exportModal.isOpen}
         onClose={() => setExportModal({ isOpen: false, type: 'daily', title: '' })}
         title={`Configure & Export: ${exportModal.title}`}
-        subtitle="Customize your regional filters and data columns before download"
+        subtitle="Customize your regional scope and selected data columns before download"
         maxWidth="lg"
       >
-        <div className="space-y-5">
-          {/* Regional Scope Info */}
-          <div className="p-3.5 bg-zinc-50 rounded-2xl border border-zinc-200 space-y-2">
+        <div className="flex flex-col gap-4 text-xs">
+          {/* Regional Scope */}
+          <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-200 flex flex-col gap-2">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-bold text-zinc-700 uppercase tracking-wider">
-                State Jurisdiction Filter
+              <label className="text-xs font-semibold text-zinc-800 uppercase tracking-wider">
+                State Jurisdiction Scope
               </label>
-              <span className="text-[10px] font-mono text-zinc-500">
-                {exportStateScope === 'ALL' ? 'Multi-Sheet Excel Workbook' : 'Single State CSV'}
-              </span>
+              <Badge variant="outline" size="sm" className="font-mono text-zinc-600">
+                {exportStateScope === 'ALL' ? 'Multi-Sheet Excel' : 'Single State CSV'}
+              </Badge>
             </div>
             <select
               value={exportStateScope}
               onChange={e => setExportStateScope(e.target.value)}
-              className="w-full h-10 px-3 bg-white border border-zinc-200 rounded-xl text-xs font-semibold text-zinc-800 outline-none focus:border-primary"
+              className="w-full h-9 px-3 bg-white border border-zinc-200 rounded-md text-xs font-medium text-zinc-800 outline-none focus:border-zinc-950"
             >
-              <option value="ALL">All States (Multi-Sheet Excel)</option>
+              <option value="ALL">All States (Multi-Sheet Excel Workbook)</option>
               {uniqueStates.map(s => (
                 <option key={s} value={s}>{s}</option>
               ))}
             </select>
-            <p className="text-[11px] text-zinc-500">
-              * Note: "All States" generates a single Excel workbook. Individual states download as CSV.
-            </p>
           </div>
 
           {/* Column Checkboxes */}
           <div>
             <div className="flex items-center justify-between mb-2">
-              <span className="text-xs font-bold text-zinc-800">
+              <span className="text-xs font-semibold text-zinc-800">
                 Visible Export Columns ({selectedColumns.length} of {ALL_EXPORT_COLUMNS.length} selected)
               </span>
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <button
                   type="button"
                   onClick={() => handleSelectAllColumns(true)}
-                  className="text-[11px] text-primary font-bold hover:underline"
+                  className="text-[11px] text-zinc-800 font-semibold hover:underline"
                 >
                   Select All
                 </button>
@@ -749,15 +754,15 @@ export const Reports: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto p-2 border border-zinc-200 rounded-2xl bg-zinc-50/50 custom-scrollbar">
+            <div className="grid grid-cols-2 gap-2 max-h-56 overflow-y-auto p-2 border border-zinc-200 rounded-lg bg-zinc-50/50 custom-scrollbar">
               {ALL_EXPORT_COLUMNS.map(col => {
                 const checked = selectedColumns.includes(col.id);
                 return (
                   <label
                     key={col.id}
-                    className={`flex items-center gap-2 p-2 rounded-xl border text-xs cursor-pointer select-none transition-all ${
+                    className={`flex items-center gap-2 p-2 rounded-md border text-xs cursor-pointer select-none transition-all ${
                       checked
-                        ? 'bg-white border-primary/40 text-zinc-900 font-bold shadow-2xs'
+                        ? 'bg-white border-zinc-300 text-zinc-900 font-medium shadow-xs'
                         : 'bg-transparent border-transparent text-zinc-500 hover:bg-zinc-100'
                     }`}
                   >
@@ -765,7 +770,7 @@ export const Reports: React.FC = () => {
                       type="checkbox"
                       checked={checked}
                       onChange={() => toggleColumn(col.id)}
-                      className="rounded border-zinc-300 text-primary focus:ring-primary h-3.5 w-3.5"
+                      className="rounded border-zinc-300 text-zinc-900 focus:ring-zinc-950 size-3.5"
                     />
                     <span className="truncate">{col.label}</span>
                   </label>
@@ -775,22 +780,21 @@ export const Reports: React.FC = () => {
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100">
-            <button
-              type="button"
+            <Button
+              variant="ghost"
               onClick={() => setExportModal({ isOpen: false, type: 'daily', title: '' })}
-              className="px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
             >
               Cancel
-            </button>
-            <button
-              type="button"
+            </Button>
+            <Button
+              variant="default"
               onClick={handleExecuteExport}
               disabled={isDownloading || selectedColumns.length === 0}
-              className="flex items-center gap-2 px-5 py-2 bg-primary hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-sm transition-all disabled:opacity-50"
+              className="bg-zinc-900 hover:bg-zinc-800 text-white font-medium"
             >
-              <Download className="h-4 w-4" />
+              <Download className="size-3.5 mr-1.5" />
               <span>{isDownloading ? 'Generating File...' : 'Generate & Download'}</span>
-            </button>
+            </Button>
           </div>
         </div>
       </Modal>

@@ -1,17 +1,28 @@
 {
   "$schema": "https://ui.shadcn.com/schema.json",
+<<<<<<< HEAD
   "style": "base-nova",
+=======
+  "style": "default",
+>>>>>>> tuckit-test
   "rsc": false,
   "tsx": true,
   "tailwind": {
     "config": "tailwind.config.js",
     "css": "src/index.css",
+<<<<<<< HEAD
     "baseColor": "neutral",
     "cssVariables": true,
     "prefix": ""
   },
   "iconLibrary": "lucide",
   "rtl": false,
+=======
+    "baseColor": "zinc",
+    "cssVariables": true,
+    "prefix": ""
+  },
+>>>>>>> tuckit-test
   "aliases": {
     "components": "@/components",
     "utils": "@/lib/utils",
@@ -19,7 +30,11 @@
     "lib": "@/lib",
     "hooks": "@/hooks"
   },
+<<<<<<< HEAD
   "menuColor": "default",
   "menuAccent": "subtle",
   "registries": {}
+=======
+  "iconLibrary": "lucide"
+>>>>>>> tuckit-test
 }

@@ -1,5 +1,30 @@
 import React, { useState } from 'react';
-import { IndianRupee, Save, Plus, Edit2, CheckCircle2, ShieldAlert } from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import {
+  IndianRupee,
+  Save,
+  Edit2,
+  CheckCircle2,
+  Tag,
+  X,
+} from 'lucide-react';
 
 interface PricingTier {
   id: string;
@@ -47,140 +72,159 @@ export const PricingControl: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black text-zinc-900 flex items-center gap-2">
-            <IndianRupee className="h-5 w-5 text-primary" /> Pricing & Rate Matrix
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">Configure venue-specific base rates, excess hour penalties, and 24-hr daily maximum caps</p>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Dynamic Pricing & Rate Matrix</h1>
+            <Badge variant="outline" size="sm" className="font-mono">
+              EDGE CONFIG
+            </Badge>
+          </div>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Configure venue-specific base rates, excess hour penalties, and 24-hr daily maximum caps.
+          </p>
         </div>
       </div>
 
       {saveSuccess && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600" />
-          Pricing rules successfully updated and synchronized to edge terminals!
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+          <span>Pricing rules successfully updated and synchronized to edge IoT terminals!</span>
         </div>
       )}
 
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                <th className="py-3 px-4">RULE ID</th>
-                <th className="py-3 px-4">VENUE TYPE</th>
-                <th className="py-3 px-4">LOCKER SIZE</th>
-                <th className="py-3 px-4">BASE WINDOW</th>
-                <th className="py-3 px-4">BASE RATE</th>
-                <th className="py-3 px-4">EXCESS / HOUR</th>
-                <th className="py-3 px-4">MAX DAILY CAP</th>
-                <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-4 text-right">ACTION</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:px-6 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-sm font-bold text-ink">Active Tariff Schemes ({tiers.length})</CardTitle>
+            <CardDescription className="text-xs text-ink-muted">
+              Live rate rules deployed across kiosks
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Rule ID</TableHead>
+                <TableHead>Venue Type</TableHead>
+                <TableHead>Locker Size</TableHead>
+                <TableHead>Base Window</TableHead>
+                <TableHead>Base Rate</TableHead>
+                <TableHead>Excess / Hour</TableHead>
+                <TableHead>Max Daily Cap</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {tiers.map(t => {
                 const isEditing = editingId === t.id;
                 return (
-                  <tr key={t.id} className="hover:bg-zinc-50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-zinc-900">{t.id}</td>
-                    <td className="py-3 px-4 font-bold text-zinc-800">{t.venueType}</td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 bg-zinc-100 text-zinc-700 rounded-md font-bold text-[10px]">
+                  <TableRow key={t.id}>
+                    <TableCell className="font-mono font-bold text-ink">{t.id}</TableCell>
+                    <TableCell className="font-semibold text-ink">{t.venueType}</TableCell>
+                    <TableCell>
+                      <Badge variant="secondary" size="sm">
                         {t.size}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 font-mono">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="font-mono">
                       {isEditing ? (
-                        <input
+                        <Input
                           type="number"
                           value={editForm.initialHours || 0}
                           onChange={e => setEditForm(p => ({ ...p, initialHours: Number(e.target.value) }))}
-                          className="w-16 p-1 border rounded bg-white text-xs font-mono font-bold"
+                          className="w-20 h-8 text-xs font-mono font-bold"
                         />
                       ) : (
                         `${t.initialHours} Hours`
                       )}
-                    </td>
-                    <td className="py-3 px-4 font-black text-zinc-900">
+                    </TableCell>
+                    <TableCell className="font-bold text-ink font-mono">
                       {isEditing ? (
-                        <input
+                        <Input
                           type="number"
                           value={editForm.initialRate || 0}
                           onChange={e => setEditForm(p => ({ ...p, initialRate: Number(e.target.value) }))}
-                          className="w-20 p-1 border rounded bg-white text-xs font-mono font-bold text-primary"
+                          className="w-20 h-8 text-xs font-mono font-bold text-primary"
                         />
                       ) : (
                         `₹${t.initialRate}`
                       )}
-                    </td>
-                    <td className="py-3 px-4 font-mono text-zinc-700">
+                    </TableCell>
+                    <TableCell className="font-mono text-ink-muted">
                       {isEditing ? (
-                        <input
+                        <Input
                           type="number"
                           value={editForm.excessHourlyRate || 0}
                           onChange={e => setEditForm(p => ({ ...p, excessHourlyRate: Number(e.target.value) }))}
-                          className="w-20 p-1 border rounded bg-white text-xs font-mono font-bold"
+                          className="w-20 h-8 text-xs font-mono font-bold"
                         />
                       ) : (
                         `₹${t.excessHourlyRate} / hr`
                       )}
-                    </td>
-                    <td className="py-3 px-4 font-black text-emerald-600">
+                    </TableCell>
+                    <TableCell className="font-bold text-emerald-600 font-mono">
                       {isEditing ? (
-                        <input
+                        <Input
                           type="number"
                           value={editForm.maxDailyCap || 0}
                           onChange={e => setEditForm(p => ({ ...p, maxDailyCap: Number(e.target.value) }))}
-                          className="w-20 p-1 border rounded bg-white text-xs font-mono font-bold text-emerald-600"
+                          className="w-20 h-8 text-xs font-mono font-bold text-emerald-600"
                         />
                       ) : (
                         `₹${t.maxDailyCap}`
                       )}
-                    </td>
-                    <td className="py-3 px-4">
-                      <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant={t.status === 'ACTIVE' ? 'success' : 'secondary'} size="sm">
                         {t.status}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
                       {isEditing ? (
                         <div className="flex items-center justify-end gap-1.5">
-                          <button
-                            type="button"
+                          <Button
+                            variant="primary"
+                            size="sm"
                             onClick={saveEdit}
-                            className="px-2.5 py-1 bg-primary text-white text-[11px] font-bold rounded-lg hover:bg-orange-600 flex items-center gap-1"
+                            className="h-7 px-2.5 text-xs font-bold"
                           >
-                            <Save className="h-3 w-3" /> Save
-                          </button>
-                          <button
-                            type="button"
+                            <Save className="size-3" />
+                            <span>Save</span>
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
                             onClick={() => setEditingId(null)}
-                            className="px-2.5 py-1 border border-zinc-200 text-zinc-600 text-[11px] font-bold rounded-lg hover:bg-zinc-100"
+                            className="h-7 px-2 text-xs"
                           >
                             Cancel
-                          </button>
+                          </Button>
                         </div>
                       ) : (
-                        <button
-                          type="button"
+                        <Button
+                          variant="ghost"
+                          size="icon-sm"
                           onClick={() => startEdit(t)}
-                          className="p-1 text-zinc-400 hover:text-primary rounded-md"
-                          title="Edit Pricing Tier"
+                          className="text-ink-muted hover:text-primary"
+                          title="Edit Tariff"
                         >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </button>
+                          <Edit2 className="size-3.5" />
+                        </Button>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
     </div>
   );
 };

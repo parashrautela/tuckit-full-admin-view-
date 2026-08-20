@@ -18,6 +18,7 @@
    ──────────────────────────────────────────────────────── */
 @layer base {
   :root {
+<<<<<<< HEAD
     /* ── shadcn base (neutral) ───────────────────────── */
     --background: 0 0% 100%;
     --foreground: 0 0% 3.9%;
@@ -105,6 +106,90 @@
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
     --ring: 25 95% 58%;
+=======
+    /* Primary */
+    --color-primary-50: #FFF3E8;
+    --color-primary-100: #FFE4CC;
+    --color-primary-200: #FFC898;
+    --color-primary-300: #FFA85C;
+    --color-primary-400: #FF8A2E;
+    --color-primary-500: #FF7000;
+    --color-primary-600: #E85D00;
+    --color-primary-700: #C24A00;
+    --color-primary-800: #9C3A00;
+    --color-primary-900: #7A2E00;
+    --color-primary-950: #4A1B00;
+
+    /* Neutrals */
+    --color-neutral-0: #FFFFFF;
+    --color-neutral-50: #FAF9F7;
+    --color-neutral-100: #F3F1EE;
+    --color-neutral-200: #E7E3DE;
+    --color-neutral-300: #D3CDC5;
+    --color-neutral-400: #A8A19A;
+    --color-neutral-500: #7C766F;
+    --color-neutral-600: #5C5852;
+    --color-neutral-700: #423F3B;
+    --color-neutral-800: #2B2926;
+    --color-neutral-900: #1A1917;
+    --color-neutral-950: #0D0C0B;
+
+    /* Semantic: Success */
+    --color-success-50: #EFFAF3;
+    --color-success-100: #B7EAC7;
+    --color-success-500: #16A34A;
+    --color-success-700: #0F7A37;
+
+    /* Semantic: Warning */
+    --color-warning-50: #FEF9EC;
+    --color-warning-100: #F5DE9C;
+    --color-warning-500: #EAB308;
+    --color-warning-700: #946200;
+
+    /* Semantic: Error */
+    --color-error-50: #FDF0F0;
+    --color-error-100: #F3B9B9;
+    --color-error-500: #DC2626;
+    --color-error-700: #A01818;
+
+    /* Semantic: Info */
+    --color-info-50: #EEF4FE;
+    --color-info-100: #B9D0F5;
+    --color-info-500: #2563EB;
+    --color-info-700: #1D4ED8;
+
+    /* Surfaces & text shortcuts */
+    --bg-app: var(--color-neutral-50);
+    --bg-surface: var(--color-neutral-0);
+    --bg-sidebar: var(--color-neutral-100);
+    --border-default: var(--color-neutral-200);
+    --text-primary: var(--color-neutral-800);
+    --text-secondary: var(--color-neutral-500);
+    --text-on-primary: #FFFFFF;
+    --focus-ring: var(--color-primary-500);
+
+    /* Shadcn compatibility tokens */
+    --background: 40 14% 97%;
+    --foreground: 36 6% 16%;
+    --card: 0 0% 100%;
+    --card-foreground: 36 6% 16%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 36 6% 16%;
+    --primary: 26.4 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 36 14% 94%;
+    --secondary-foreground: 36 6% 16%;
+    --muted: 36 14% 94%;
+    --muted-foreground: 34 5% 46%;
+    --accent: 36 14% 94%;
+    --accent-foreground: 36 6% 16%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 34 14% 88%;
+    --input: 34 14% 80%;
+    --ring: 26.4 100% 50%;
+    --radius: 0.5rem;
+>>>>>>> tuckit-test
 
     --success: 152 60% 55%;
     --success-bg: 152 40% 12%;
@@ -147,8 +232,8 @@
   html {
     @apply font-sans;
   }
-}
 
+<<<<<<< HEAD
 /* ────────────────────────────────────────────────────────
    Typography Utilities — DESIGN.md type scale
    ──────────────────────────────────────────────────────── */
@@ -158,118 +243,47 @@
     font-weight: 500;
     line-height: 1.20;
     letter-spacing: -0.5px;
+=======
+  [data-theme="dark"] {
+    --bg-app: var(--color-neutral-950);
+    --bg-surface: var(--color-neutral-900);
+    --bg-sidebar: var(--color-neutral-900);
+    --border-default: var(--color-neutral-800);
+    --text-primary: var(--color-neutral-50);
+    --text-secondary: var(--color-neutral-400);
+>>>>>>> tuckit-test
   }
 
-  .text-type-card-title {
-    font-size: 22px;
-    font-weight: 500;
-    line-height: 1.25;
-    letter-spacing: -0.3px;
-  }
-
-  .text-type-subhead {
-    font-size: 20px;
-    font-weight: 400;
-    line-height: 1.40;
-    letter-spacing: -0.2px;
-  }
-
-  .text-type-body-lg {
-    font-size: 18px;
-    font-weight: 400;
-    line-height: 1.50;
-    letter-spacing: -0.1px;
-  }
-
-  .text-type-body {
-    font-size: 16px;
-    font-weight: 400;
-    line-height: 1.50;
-    letter-spacing: 0;
-  }
-
-  .text-type-body-sm {
-    font-size: 14px;
-    font-weight: 400;
-    line-height: 1.50;
-    letter-spacing: 0;
-  }
-
-  .text-type-caption {
-    font-size: 12px;
-    font-weight: 400;
-    line-height: 1.40;
-    letter-spacing: 0;
-  }
-
-  .text-type-button {
-    font-size: 15px;
-    font-weight: 500;
-    line-height: 1.20;
-    letter-spacing: 0;
-  }
-
-  .text-type-eyebrow {
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.30;
-    letter-spacing: 0;
-  }
-
-  /* Scrollbar utilities */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
-  }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 5px;
-    height: 5px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: var(--hairline-soft);
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: var(--hairline);
-    border-radius: 4px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: var(--ink-subtle);
+  body {
+    background-color: var(--bg-app);
+    color: var(--text-primary);
+    font-feature-settings: "rlig" 1, "calt" 1;
   }
 }
 
-/* ────────────────────────────────────────────────────────
-   Global Base Styles
-   ──────────────────────────────────────────────────────── */
-body {
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
-  color: var(--ink);
-  background-color: var(--canvas);
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+/* Custom Scrollbar Styling */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
 }
 
-/* Smooth transitions on interactive elements */
-button, input, select, textarea, a {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
 }
 
+<<<<<<< HEAD
 /* Focus ring — orange accent, not blue browser default */
 *:focus-visible {
   outline: 2px solid hsl(var(--ring));
   outline-offset: 2px;
   border-radius: 4px;
+=======
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: var(--color-neutral-300);
+  border-radius: 9999px;
+>>>>>>> tuckit-test
 }
 
-/* Selection highlight */
-::selection {
-  background-color: #FED7AA;
-  color: #18181B;
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: var(--color-neutral-400);
 }

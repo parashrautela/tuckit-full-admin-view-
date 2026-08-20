@@ -1,25 +1,31 @@
 import React, { useState, useMemo } from 'react';
-import { useRealtime } from '../context/RealtimeContext';
-import { StatusBadge } from '../components/common/StatusBadge';
-import { Drawer } from '../components/common/Drawer';
-import { ForceUnlockModal } from '../components/control-center/ForceUnlockModal';
+import { useRealtime } from '@/context/RealtimeContext';
+import { StatusBadge } from '@/components/common/StatusBadge';
+import { Drawer } from '@/components/common/Drawer';
+import { ForceUnlockModal } from '@/components/control-center/ForceUnlockModal';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Separator } from '@/components/ui/separator';
 import {
   Grid,
   Search,
-  Lock,
   Unlock,
-  KeyRound,
   User,
-  Phone,
-  Clock,
   Wrench,
-  AlertTriangle,
   CheckCircle2,
-  SlidersHorizontal,
   ChevronLeft,
   ChevronRight,
   Eye,
   EyeOff,
+  Layers,
 } from 'lucide-react';
 
 interface SelectedLockerInfo {
@@ -50,7 +56,6 @@ export const LockerStatus: React.FC = () => {
   const itemsPerPage = 12;
 
   const sizes = ['SMALL', 'MEDIUM', 'LARGE', 'XL', '2 PHONE', '4 PHONE', '8 PHONE'] as const;
-
   const uniqueStates = useMemo(() => [...new Set(terminals.map(t => t.state))].sort(), [terminals]);
 
   const filteredTerminals = useMemo(() => {
@@ -129,164 +134,167 @@ export const LockerStatus: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Top Header */}
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header & Legend ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-bold text-zinc-900 tracking-tight">Interactive Locker Status Grid</h1>
-          <p className="text-xs text-zinc-500 mt-0.5">
-            Physical matrix of every hardware locker door across all {terminals.length} live IoT kiosks nationwide
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Physical Locker Matrix</h1>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Interactive visual matrix of physical hardware locker doors across all {terminals.length} live IoT kiosks.
           </p>
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-3 bg-zinc-50 px-3.5 py-2 rounded-lg border border-zinc-200 text-xs font-semibold">
+        <div className="flex items-center gap-3 bg-white px-3.5 py-2 rounded-lg border border-hairline text-xs font-semibold shadow-2xs">
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
-            <span className="text-zinc-600">Available</span>
+            <span className="size-2.5 rounded-full bg-emerald-500 ring-2 ring-emerald-100" />
+            <span className="text-ink-muted">Available</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-red-100" />
-            <span className="text-zinc-600">Occupied</span>
+            <span className="size-2.5 rounded-full bg-red-500 ring-2 ring-red-100" />
+            <span className="text-ink-muted">Occupied</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-amber-500 ring-2 ring-amber-100" />
-            <span className="text-zinc-600">Maintenance</span>
+            <span className="size-2.5 rounded-full bg-amber-500 ring-2 ring-amber-100" />
+            <span className="text-ink-muted">Maintenance</span>
           </div>
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-            <input
-              type="text"
-              value={search}
-              onChange={e => {
-                setSearch(e.target.value);
-                setCurrentPage(1);
-              }}
-              placeholder="Search by terminal code or site..."
-              className="w-full pl-9 pr-4 h-9 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-medium text-zinc-800 placeholder:text-zinc-400 focus:bg-white focus:border-zinc-900 outline-none transition-colors"
-            />
+      {/* ── Filter Bar ── */}
+      <Card>
+        <CardContent className="p-4 flex flex-col md:flex-row md:items-center justify-between gap-3">
+          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-1">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+              <Input
+                type="text"
+                value={search}
+                onChange={e => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
+                placeholder="Search by terminal code or site..."
+                className="pl-9"
+              />
+            </div>
+
+            <div className="flex items-center gap-2">
+              <select
+                value={stateFilter}
+                onChange={e => {
+                  setStateFilter(e.target.value);
+                  setCurrentPage(1);
+                }}
+                className="flex h-9 rounded-md border border-hairline bg-white px-3 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <option value="ALL">All States ({uniqueStates.length})</option>
+                {uniqueStates.map(st => (
+                  <option key={st} value={st}>
+                    {st}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={sizeFilter}
+                onChange={e => setSizeFilter(e.target.value)}
+                className="flex h-9 rounded-md border border-hairline bg-white px-3 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
+              >
+                <option value="ALL">All Door Sizes</option>
+                {sizes.map(s => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
 
-          <div className="flex items-center gap-2">
-            <select
-              value={stateFilter}
-              onChange={e => {
-                setStateFilter(e.target.value);
-                setCurrentPage(1);
-              }}
-              className="h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-800 focus:bg-white focus:border-zinc-900 outline-none transition-colors"
-            >
-              <option value="ALL">All States ({uniqueStates.length})</option>
-              {uniqueStates.map(st => (
-                <option key={st} value={st}>
-                  {st}
-                </option>
-              ))}
-            </select>
-
-            <select
-              value={sizeFilter}
-              onChange={e => setSizeFilter(e.target.value)}
-              className="h-9 px-3 bg-zinc-50 border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-800 focus:bg-white focus:border-zinc-900 outline-none transition-colors"
-            >
-              <option value="ALL">All Door Sizes</option>
-              {sizes.map(s => (
-                <option key={s} value={s}>
-                  {s}
-                </option>
-              ))}
-            </select>
-          </div>
-        </div>
-
-        {/* Pagination Navigator */}
-        <div className="flex items-center gap-2 text-xs text-zinc-500">
-          <span>
-            Showing <strong>{filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}</strong>–
-            <strong>{Math.min(filteredTerminals.length, currentPage * itemsPerPage)}</strong> of{' '}
-            <strong>{filteredTerminals.length}</strong> terminals
-          </span>
-          <div className="flex items-center gap-1">
-            <button
-              type="button"
-              disabled={currentPage === 1}
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              className="p-1.5 rounded-md border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
-            >
-              <ChevronLeft className="h-4 w-4" />
-            </button>
-            <span className="px-2 font-mono font-bold text-zinc-800">
-              {currentPage}/{totalPages}
+          {/* Pagination Navigator */}
+          <div className="flex items-center gap-2 text-xs text-ink-muted shrink-0">
+            <span>
+              Showing {filteredTerminals.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}–
+              {Math.min(filteredTerminals.length, currentPage * itemsPerPage)} of{' '}
+              {filteredTerminals.length} terminals
             </span>
-            <button
-              type="button"
-              disabled={currentPage === totalPages}
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              className="p-1.5 rounded-md border border-zinc-200 text-zinc-600 hover:bg-zinc-50 disabled:opacity-40"
-            >
-              <ChevronRight className="h-4 w-4" />
-            </button>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              >
+                <ChevronLeft className="size-3.5" />
+              </Button>
+              <span className="px-2 font-mono font-bold text-ink">
+                {currentPage}/{totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              >
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
 
-      {/* Terminal Kiosks Matrix */}
+      {/* ── Terminal Kiosks Matrix ── */}
       <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
         {lockerData.map(({ terminal, lockers }) => (
-          <div
-            key={terminal.id}
-            className="bg-white rounded-xl border border-zinc-200 shadow-2xs p-4 space-y-3.5 hover:border-zinc-300 transition-all"
-          >
-            {/* Terminal Header */}
-            <div className="flex items-center justify-between pb-2 border-b border-zinc-100">
+          <Card key={terminal.id} className="hover:border-zinc-300 transition-all flex flex-col justify-between">
+            <CardHeader className="p-4 pb-2 border-b border-hairline-soft flex flex-row items-center justify-between">
               <div>
                 <div className="flex items-center gap-1.5">
-                  <span className="font-mono font-bold text-zinc-900 text-xs">{terminal.code}</span>
-                  <span className="text-[10px] text-zinc-400 font-mono">({terminal.city})</span>
+                  <span className="font-mono font-bold text-ink text-xs bg-zinc-100 px-1.5 py-0.5 rounded border border-hairline">
+                    {terminal.code}
+                  </span>
+                  <span className="text-[10px] text-ink-muted font-mono">({terminal.city})</span>
                 </div>
-                <div className="text-xs font-semibold text-zinc-700 truncate max-w-[200px]">{terminal.siteName}</div>
+                <div className="text-xs font-semibold text-ink truncate max-w-[220px] mt-0.5">
+                  {terminal.siteName}
+                </div>
               </div>
               <StatusBadge status={terminal.connectivityStatus} pulse={terminal.connectivityStatus === 'ONLINE'} />
-            </div>
+            </CardHeader>
 
-            {/* Visual Doors Grid */}
-            <div className="grid grid-cols-6 gap-1.5">
-              {lockers
-                .filter(l => sizeFilter === 'ALL' || l.size === sizeFilter)
-                .map(l => (
-                  <button
-                    key={l.name}
-                    type="button"
-                    onClick={() => handleLockerClick(terminal, l)}
-                    className={`aspect-square rounded-lg border flex flex-col items-center justify-center p-1 transition-all transform hover:scale-105 active:scale-95 cursor-pointer ${
-                      l.status === 'AVAILABLE'
-                        ? 'bg-emerald-50 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
-                        : l.status === 'OCCUPIED'
-                        ? 'bg-red-50 border-red-200 text-red-800 hover:bg-red-100'
-                        : 'bg-amber-50 border-amber-200 text-amber-800 hover:bg-amber-100'
-                    }`}
-                    title={`${l.name} (${l.size}) — ${l.status}`}
-                  >
-                    <div className="text-[11px] font-bold font-mono leading-none">
-                      {l.name.replace('LKR-', '')}
-                    </div>
-                    <div className="text-[8px] font-bold text-zinc-500 uppercase tracking-tighter mt-1 truncate">
-                      {l.size}
-                    </div>
-                  </button>
-                ))}
-            </div>
-          </div>
+            <CardContent className="p-4 pt-3 flex flex-col gap-2">
+              <div className="grid grid-cols-6 gap-1.5">
+                {lockers
+                  .filter(l => sizeFilter === 'ALL' || l.size === sizeFilter)
+                  .map(l => (
+                    <button
+                      key={l.name}
+                      type="button"
+                      onClick={() => handleLockerClick(terminal, l)}
+                      className={`aspect-square rounded-md border flex flex-col items-center justify-center p-1 transition-all hover:scale-105 active:scale-95 cursor-pointer ${
+                        l.status === 'AVAILABLE'
+                          ? 'bg-emerald-50/80 border-emerald-200 text-emerald-800 hover:bg-emerald-100'
+                          : l.status === 'OCCUPIED'
+                          ? 'bg-red-50/80 border-red-200 text-red-800 hover:bg-red-100'
+                          : 'bg-amber-50/80 border-amber-200 text-amber-800 hover:bg-amber-100'
+                      }`}
+                      title={`${l.name} (${l.size}) — ${l.status}`}
+                    >
+                      <span className="text-[11px] font-bold font-mono leading-none">
+                        {l.name.replace('LKR-', '')}
+                      </span>
+                      <span className="text-[8px] font-bold text-ink-subtle uppercase tracking-tighter mt-1 truncate">
+                        {l.size}
+                      </span>
+                    </button>
+                  ))}
+              </div>
+            </CardContent>
+          </Card>
         ))}
       </div>
 
-      {/* Locker Details Slide-Over Drawer */}
+      {/* ── Locker Details Slide-Over Drawer ── */}
       <Drawer
         isOpen={isDrawerOpen}
         onClose={() => setIsDrawerOpen(false)}
@@ -294,59 +302,59 @@ export const LockerStatus: React.FC = () => {
         subtitle={`Terminal: ${selectedLocker?.terminalCode} (${selectedLocker?.terminalSite})`}
       >
         {selectedLocker && (
-          <div className="space-y-5">
+          <div className="flex flex-col gap-5 text-xs">
             {/* Status Pill */}
-            <div className="flex items-center justify-between p-3.5 bg-zinc-50 rounded-xl border border-zinc-200">
+            <div className="flex items-center justify-between p-3.5 bg-zinc-50 rounded-xl border border-hairline">
               <div>
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider block">DOOR STATUS</span>
-                <span className="text-sm font-bold text-zinc-900">{selectedLocker.status}</span>
+                <span className="text-[10px] font-bold text-ink-subtle uppercase tracking-wider block">DOOR STATUS</span>
+                <span className="text-sm font-bold text-ink">{selectedLocker.status}</span>
               </div>
               <StatusBadge status={selectedLocker.status} />
             </div>
 
             {/* Hardware Specs */}
-            <div className="p-3.5 bg-zinc-50 rounded-xl border border-zinc-200 space-y-2 text-xs">
+            <div className="p-3.5 bg-zinc-50 rounded-xl border border-hairline flex flex-col gap-2">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Locker Size:</span>
-                <span className="font-bold text-zinc-900">{selectedLocker.size}</span>
+                <span className="text-ink-muted">Locker Size:</span>
+                <span className="font-bold text-ink">{selectedLocker.size}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Terminal Code:</span>
-                <span className="font-mono font-bold text-zinc-900">{selectedLocker.terminalCode}</span>
+                <span className="text-ink-muted">Terminal Code:</span>
+                <span className="font-mono font-bold text-ink">{selectedLocker.terminalCode}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Lock Relay Channel:</span>
-                <span className="font-mono text-zinc-700">CH-{selectedLocker.doorNumber.replace('LKR-', '')}</span>
+                <span className="text-ink-muted">Lock Relay Channel:</span>
+                <span className="font-mono text-ink">CH-{selectedLocker.doorNumber.replace('LKR-', '')}</span>
               </div>
             </div>
 
             {/* Occupant Details if Occupied */}
             {selectedLocker.status === 'OCCUPIED' && (
-              <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-200 space-y-2.5 text-xs">
+              <div className="p-4 bg-orange-50/50 rounded-xl border border-orange-200 flex flex-col gap-2.5">
                 <div className="flex items-center gap-1.5 text-xs font-bold text-orange-900 uppercase tracking-wider">
-                  <User className="h-3.5 w-3.5 text-primary" /> Active Customer Occupant
+                  <User className="size-3.5 text-primary" /> Active Customer Occupant
                 </div>
                 <div className="flex justify-between pt-1">
-                  <span className="text-zinc-500">Name:</span>
-                  <span className="font-bold text-zinc-900">{selectedLocker.occupantName}</span>
+                  <span className="text-ink-muted">Name:</span>
+                  <span className="font-bold text-ink">{selectedLocker.occupantName}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Mobile:</span>
-                  <span className="font-mono font-bold text-zinc-900">{selectedLocker.occupantPhone}</span>
+                  <span className="text-ink-muted">Mobile:</span>
+                  <span className="font-mono font-bold text-ink">{selectedLocker.occupantPhone}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Check-in Duration:</span>
+                  <span className="text-ink-muted">Check-in Duration:</span>
                   <span className="font-bold text-emerald-700">{selectedLocker.startTime}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <div className="flex items-center gap-2">
-                    <span className="text-zinc-500">Door Passcode:</span>
+                    <span className="text-ink-muted">Door Passcode:</span>
                     <button
                       type="button"
                       onClick={handleToggleDrawerPasscode}
                       className="text-[10px] text-primary font-bold hover:underline flex items-center gap-0.5"
                     >
-                      {showPasscodeInDrawer ? <EyeOff className="h-3 w-3" /> : <Eye className="h-3 w-3" />}
+                      {showPasscodeInDrawer ? <EyeOff className="size-3" /> : <Eye className="size-3" />}
                       {showPasscodeInDrawer ? 'Mask' : 'Reveal'}
                     </button>
                   </div>
@@ -355,47 +363,47 @@ export const LockerStatus: React.FC = () => {
                   </span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-zinc-500">Accrued Amount:</span>
-                  <span className="font-bold text-zinc-900">₹{selectedLocker.amount}</span>
+                  <span className="text-ink-muted">Accrued Amount:</span>
+                  <span className="font-bold text-ink">₹{selectedLocker.amount}</span>
                 </div>
               </div>
             )}
 
             {/* Operational Actions */}
-            <div className="space-y-2.5 pt-2 border-t border-zinc-100">
-              <button
-                type="button"
+            <div className="flex flex-col gap-2 pt-2 border-t border-hairline-soft">
+              <Button
+                variant="default"
                 onClick={() => {
                   setForceUnlockDoor({
                     terminalCode: selectedLocker.terminalCode,
                     lockName: selectedLocker.doorNumber,
                   });
                 }}
-                className="w-full h-10 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg shadow-2xs transition-colors flex items-center justify-center gap-2"
+                className="w-full justify-center"
               >
-                <Unlock className="h-4 w-4 text-primary" />
+                <Unlock className="size-4 text-primary" />
                 <span>Emergency Force Open Door</span>
-              </button>
+              </Button>
 
               {selectedLocker.status === 'OCCUPIED' && (
-                <button
-                  type="button"
+                <Button
+                  variant="outline"
                   onClick={handleVacate}
-                  className="w-full h-10 border border-zinc-300 hover:bg-zinc-100 text-zinc-800 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                  className="w-full justify-center text-emerald-700 hover:text-emerald-800"
                 >
-                  <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                  <CheckCircle2 className="size-4 text-emerald-600" />
                   <span>Release / Vacate Locker</span>
-                </button>
+                </Button>
               )}
 
-              <button
-                type="button"
+              <Button
+                variant="secondary"
                 onClick={handleToggleMaintenance}
-                className="w-full h-10 border border-zinc-200 hover:bg-zinc-50 text-zinc-700 text-xs font-semibold rounded-lg transition-colors flex items-center justify-center gap-2"
+                className="w-full justify-center"
               >
-                <Wrench className="h-4 w-4 text-amber-600" />
+                <Wrench className="size-4 text-amber-600" />
                 <span>{selectedLocker.status === 'MAINTENANCE' ? 'Clear Maintenance Mode' : 'Set to Maintenance Mode'}</span>
-              </button>
+              </Button>
             </div>
           </div>
         )}

@@ -1,42 +1,45 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext';
-import { useRealtime } from '../../context/RealtimeContext';
+import { useAuth } from '@/context/AuthContext';
+import { useRealtime } from '@/context/RealtimeContext';
 import {
-  LayoutDashboard,
-  BarChart3,
-  MonitorCheck,
-  Grid,
   Building2,
+  Layers,
   GraduationCap,
-  Users2,
-  Receipt,
-  RotateCcw,
-  Tag,
-  FileSpreadsheet,
-  Wallet,
-  UserCheck,
-  Users,
-  UserCog,
-  ShieldAlert,
-  ClipboardList,
+  CircleDollarSign,
+  Shield,
   Bell,
-  Sliders,
   X,
   LogOut,
-  Lock,
+  ChevronRight,
 } from 'lucide-react';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 interface MobileNavProps {
   isOpen: boolean;
   onClose: () => void;
 }
 
-interface MobileNavItem {
+interface NavSubItem {
   path: string;
   label: string;
-  icon: any;
   badge?: number;
+}
+
+interface NavMenuItem {
+  key: string;
+  title: string;
+  icon: React.ElementType;
+  path?: string;
+  items?: NavSubItem[];
+  badge?: number;
+}
+
+interface NavGroup {
+  label: string;
+  items: NavMenuItem[];
 }
 
 export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
@@ -45,6 +48,96 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const currentPath = location.pathname;
+
+  const [openItems, setOpenItems] = useState<Record<string, boolean>>({
+    fleet: true,
+    pesit: false,
+    revenue: false,
+    access: false,
+  });
+
+  const navGroups: NavGroup[] = [
+    {
+      label: 'Platform',
+      items: [
+        {
+          key: 'fleet',
+          title: 'Overview & Fleet',
+          icon: Layers,
+          items: [
+            { path: '/dashboard', label: 'Live Fleet Bookings Stream' },
+            { path: '/reports', label: 'Reports & Financial Analytics' },
+            { path: '/device-status', label: 'Terminal Telemetry & Fleet Status' },
+            { path: '/locker-status', label: 'Physical Locker Matrix' },
+            { path: '/future-first', label: 'Future First Locker Management' },
+          ],
+        },
+        {
+          key: 'pesit',
+          title: 'PESIT Lockers',
+          icon: GraduationCap,
+          items: [
+            { path: '/pesit-terminals', label: 'PESIT Hardware Terminals' },
+            { path: '/pesit-students', label: 'Student Directory' },
+            { path: '/pesit-managers', label: 'Locker Managers' },
+          ],
+        },
+        {
+          key: 'revenue',
+          title: 'Revenue & Operations',
+          icon: CircleDollarSign,
+          badge: (pendingRefundsCount || 0) + (pendingStaffCreditsCount || 0),
+          items: [
+            { path: '/refund-requests', label: 'Refund Requests', badge: pendingRefundsCount },
+            { path: '/refund-history', label: 'Refund Logs & History' },
+            { path: '/pricing', label: 'Dynamic Pricing Control' },
+            { path: '/state-gst', label: 'State GST & Invoicing' },
+            { path: '/staff-credit', label: 'Staff Credit Requests', badge: pendingStaffCreditsCount },
+            { path: '/staff-profiles', label: 'Staff Directory' },
+          ],
+        },
+        {
+          key: 'access',
+          title: 'Access & Governance',
+          icon: Shield,
+          items: [
+            { path: '/users', label: 'Customer Directory' },
+            { path: '/admins', label: 'Admin Directory' },
+            { path: '/employee-monitor', label: 'Employee Monitor' },
+            { path: '/roles', label: 'Roles & Permissions (RBAC)' },
+            { path: '/blacklist-history', label: 'Blacklist Audit Trail' },
+            { path: '/audit-logs', label: 'Immutable Audit Logs' },
+          ],
+        },
+      ],
+    },
+    {
+      label: 'Tools & Diagnostics',
+      items: [
+        {
+          key: 'alerts',
+          title: 'System Alerts',
+          icon: Bell,
+          path: '/alerts',
+          badge: totalAlertsCount,
+        },
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    navGroups.forEach(g => {
+      g.items.forEach(item => {
+        if (item.items?.some(sub => sub.path === currentPath)) {
+          setOpenItems(prev => ({ ...prev, [item.key]: true }));
+        }
+      });
+    });
+  }, [currentPath]);
+
+  const toggleItem = (key: string) => {
+    setOpenItems(prev => ({ ...prev, [key]: !prev[key] }));
+  };
 
   const handleLogout = () => {
     logout();
@@ -56,160 +149,174 @@ export const MobileNav: React.FC<MobileNavProps> = ({ isOpen, onClose }) => {
     navigate(path);
   };
 
-  const groups: { title: string; items: MobileNavItem[] }[] = [
-    {
-      title: 'Main',
-      items: [
-        { path: '/dashboard', label: 'Dashboard & Main View', icon: LayoutDashboard },
-        { path: '/reports', label: 'Reports & Analysis', icon: BarChart3 },
-        { path: '/device-status', label: 'Device / Terminal Status', icon: MonitorCheck },
-        { path: '/locker-status', label: 'Locker Status', icon: Grid },
-        { path: '/future-first', label: 'Future First', icon: Building2 },
-      ],
-    },
-    {
-      title: 'PESIT Locker',
-      items: [
-        { path: '/pesit-terminals', label: 'PESIT Terminals', icon: MonitorCheck },
-        { path: '/pesit-students', label: 'Student Management', icon: GraduationCap },
-        { path: '/pesit-managers', label: 'Locker Managers', icon: Users2 },
-      ],
-    },
-    {
-      title: 'Revenue & Billing',
-      items: [
-        { path: '/refund-requests', label: 'Refund Requests', icon: RotateCcw, badge: pendingRefundsCount },
-        { path: '/refund-history', label: 'Refund History', icon: Receipt },
-        { path: '/pricing', label: 'Pricing Control', icon: Tag },
-        { path: '/state-gst', label: 'State GST Config', icon: FileSpreadsheet },
-        { path: '/staff-credit', label: 'Staff Credit Request', icon: Wallet, badge: pendingStaffCreditsCount },
-        { path: '/staff-profiles', label: 'Staff Profiles', icon: UserCheck },
-      ],
-    },
-    {
-      title: 'User Management',
-      items: [
-        { path: '/users', label: 'Customers', icon: Users },
-        { path: '/admins', label: 'Internal Admins', icon: UserCog },
-        { path: '/employee-monitor', label: 'Employee Monitor', icon: UserCheck },
-        { path: '/roles', label: 'Roles & RBAC', icon: Lock },
-        { path: '/blacklist-history', label: 'Block / Unblock History', icon: ShieldAlert },
-        { path: '/audit-logs', label: 'Audit Logs', icon: ClipboardList },
-      ],
-    },
-  ];
-
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-[100] lg:hidden">
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px]"
+        className="fixed inset-0 bg-neutral-900/40 backdrop-blur-xs transition-opacity"
         onClick={onClose}
       />
 
       {/* Drawer */}
-      <div className="fixed inset-y-0 left-0 w-72 bg-white shadow-2xl flex flex-col z-10 animate-in slide-in-from-left duration-200">
-        {/* Header */}
-        <div className="flex items-center justify-between px-4 h-14 border-b border-hairline-soft shrink-0">
-          <div className="flex items-center gap-2.5">
-            <div className="h-7 w-7 rounded-lg bg-primary flex items-center justify-center text-white font-black text-sm">
-              T
+      <div className="fixed inset-y-0 left-0 w-72 bg-neutral-100 shadow-xl flex flex-col z-10 animate-in slide-in-from-left duration-200 select-none">
+        {/* Top Header / Team Switcher */}
+        <div className="p-2 border-b border-neutral-200 flex items-center justify-between">
+          <div className="flex items-center gap-2 px-1">
+            <div className="size-8 rounded-lg bg-primary-500 text-white flex items-center justify-center font-bold text-sm shrink-0 shadow-xs">
+              <Building2 className="size-4" />
             </div>
-            <span className="font-extrabold text-base tracking-tight text-ink">
-              TUCK<span className="text-primary">IT</span>
-            </span>
+            <div className="flex flex-col min-w-0">
+              <span className="text-sm font-semibold text-neutral-800 truncate leading-tight">
+                Tuckit Inc
+              </span>
+              <span className="text-[11px] text-neutral-500 truncate leading-tight">
+                Enterprise Console
+              </span>
+            </div>
           </div>
-          <button
-            type="button"
+          <Button
+            variant="ghost"
+            size="icon-sm"
             onClick={onClose}
-            className="p-1 text-ink-subtle hover:text-ink rounded-md"
+            className="text-neutral-500 hover:text-neutral-900"
           >
-            <X className="h-5 w-5" />
-          </button>
+            <X className="size-4" />
+          </Button>
         </div>
 
-        {/* Nav Groups */}
-        <div className="flex-1 overflow-y-auto custom-scrollbar py-3 px-3 space-y-4">
-          {groups.map((group, idx) => (
-            <div key={idx} className="space-y-0.5">
-              <p className="text-[11px] font-semibold text-ink-subtle uppercase tracking-wider px-2 mb-1">
-                {group.title}
-              </p>
+        {/* Nav Items */}
+        <div className="flex-1 overflow-y-auto custom-scrollbar p-2 flex flex-col gap-4">
+          {navGroups.map((group, gIdx) => (
+            <div key={gIdx} className="flex flex-col gap-1">
+              <div className="px-2 py-1 text-xs font-medium text-neutral-500">
+                {group.label}
+              </div>
+
               {group.items.map(item => {
                 const Icon = item.icon;
-                const isActive = currentPath === item.path;
+                const isOpen = openItems[item.key];
+                const hasSubItems = item.items && item.items.length > 0;
+                const isDirectActive = item.path && currentPath === item.path;
+                const isChildActive = item.items?.some(sub => sub.path === currentPath);
+
+                if (!hasSubItems) {
+                  return (
+                    <button
+                      key={item.key}
+                      type="button"
+                      onClick={() => item.path && go(item.path)}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm transition-colors text-left font-medium",
+                        isDirectActive
+                          ? "bg-primary-50 text-primary-700 font-semibold"
+                          : "text-neutral-700 hover:bg-neutral-200/50 hover:text-neutral-900"
+                      )}
+                    >
+                      <Icon className={cn("size-4 shrink-0", isDirectActive ? "text-primary-500" : "text-neutral-500")} />
+                      <span className="truncate flex-1">{item.title}</span>
+                      {item.badge && item.badge > 0 ? (
+                        <span className="bg-error-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      ) : null}
+                    </button>
+                  );
+                }
+
                 return (
-                  <button
-                    key={item.path}
-                    type="button"
-                    onClick={() => go(item.path)}
-                    className={`w-full flex items-center justify-between px-2.5 py-2 rounded-md text-[13px] transition-colors ${
-                      isActive
-                        ? 'bg-orange-50 text-primary font-semibold'
-                        : 'text-ink-muted hover:bg-zinc-50 hover:text-ink'
-                    }`}
-                  >
-                    <div className="flex items-center gap-2.5">
-                      <Icon className={`h-[18px] w-[18px] ${isActive ? 'text-primary' : 'text-ink-subtle'}`} />
-                      <span>{item.label}</span>
-                    </div>
-                    {item.badge && item.badge > 0 ? (
-                      <span className="h-[18px] min-w-[18px] px-1 flex items-center justify-center rounded-full bg-primary text-white text-[10px] font-bold">
-                        {item.badge}
-                      </span>
-                    ) : null}
-                  </button>
+                  <div key={item.key} className="flex flex-col">
+                    <button
+                      type="button"
+                      onClick={() => toggleItem(item.key)}
+                      className={cn(
+                        "w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md text-sm transition-colors text-left font-medium",
+                        (isChildActive && !isOpen) || isDirectActive
+                          ? "bg-primary-50 text-primary-700 font-semibold"
+                          : "text-neutral-700 hover:bg-neutral-200/50 hover:text-neutral-900"
+                      )}
+                    >
+                      <Icon className={cn("size-4 shrink-0", isChildActive ? "text-primary-500" : "text-neutral-500")} />
+                      <span className="truncate flex-1">{item.title}</span>
+                      {item.badge && item.badge > 0 && (
+                        <span className="bg-error-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full leading-none mr-1">
+                          {item.badge > 9 ? '9+' : item.badge}
+                        </span>
+                      )}
+                      <ChevronRight
+                        className={cn(
+                          "size-4 text-neutral-400 transition-transform duration-200",
+                          isOpen && "rotate-90"
+                        )}
+                      />
+                    </button>
+
+                    {/* Sub-items rail */}
+                    {isOpen && item.items && (
+                      <div className="ml-3.5 pl-3 border-l border-neutral-200 flex flex-col gap-0.5 my-1">
+                        {item.items.map(subItem => {
+                          const isSubActive = currentPath === subItem.path;
+                          return (
+                            <button
+                              key={subItem.path}
+                              type="button"
+                              onClick={() => go(subItem.path)}
+                              className={cn(
+                                "w-full text-left px-2 py-1.5 rounded-md text-sm transition-colors flex items-center justify-between",
+                                isSubActive
+                                  ? "bg-primary-50 text-primary-700 font-semibold"
+                                  : "text-neutral-600 hover:bg-neutral-200/50 hover:text-neutral-900"
+                              )}
+                            >
+                              <span className="truncate pr-1">{subItem.label}</span>
+                              {subItem.badge && subItem.badge > 0 && (
+                                <span className="bg-error-500 text-white text-[9px] font-bold px-1.5 py-0.5 rounded-full leading-none">
+                                  {subItem.badge > 9 ? '9+' : subItem.badge}
+                                </span>
+                              )}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 );
               })}
             </div>
           ))}
-
-          {/* System Alerts */}
-          <div className="space-y-0.5">
-            <p className="text-[11px] font-semibold text-ink-subtle uppercase tracking-wider px-2 mb-1">System</p>
-            <button
-              type="button"
-              onClick={() => go('/alerts')}
-              className={`w-full flex items-center justify-between px-2.5 py-2 rounded-md text-[13px] transition-colors ${
-                currentPath === '/alerts'
-                  ? 'bg-orange-50 text-primary font-semibold'
-                  : 'text-ink-muted hover:bg-zinc-50 hover:text-ink'
-              }`}
-            >
-              <div className="flex items-center gap-2.5">
-                <Bell className="h-[18px] w-[18px]" />
-                <span>System Alerts</span>
-              </div>
-              {totalAlertsCount > 0 && (
-                <span className="h-[18px] min-w-[18px] px-1 flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold">
-                  {totalAlertsCount}
-                </span>
-              )}
-            </button>
-          </div>
         </div>
 
-        {/* Bottom: User & Logout */}
-        <div className="shrink-0 border-t border-hairline-soft p-3 space-y-2">
-          <div className="flex items-center gap-2.5 px-2">
-            <div className="h-7 w-7 rounded-md bg-zinc-100 border border-hairline flex items-center justify-center text-ink font-bold text-xs">
-              {session?.username ? session.username.charAt(0).toUpperCase() : 'P'}
-            </div>
-            <div className="flex flex-col min-w-0">
-              <span className="text-[12px] font-semibold text-ink truncate">{session?.username || 'parash'}</span>
-              <span className="text-[10px] font-bold text-primary uppercase tracking-wider">{session?.role || 'SUPERADMIN'}</span>
+        {/* Bottom User & Logout */}
+        <div className="p-2 border-t border-neutral-200 flex flex-col gap-2 shrink-0">
+          <div className="flex items-center gap-2.5 p-1.5">
+            <Avatar className="size-8 rounded-lg">
+              <AvatarFallback className="rounded-lg bg-neutral-800 text-white font-semibold text-xs">
+                {session?.name ? session.name.charAt(0).toUpperCase() : 'P'}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col min-w-0 flex-1">
+              <span className="text-sm font-semibold text-neutral-800 truncate leading-tight">
+                {session?.name || 'Parash Rautela'}
+              </span>
+              <span className="text-[11px] text-neutral-500 truncate leading-tight">
+                {session?.username ? `${session.username}@tuckit.in` : 'parash@tuckit.in'}
+              </span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => { onClose(); handleLogout(); }}
-            className="w-full flex items-center justify-center gap-2 py-2 rounded-md text-[13px] font-semibold text-red-600 hover:bg-red-50 transition-colors"
+
+          <Button
+            variant="destructive"
+            size="sm"
+            onClick={() => {
+              onClose();
+              handleLogout();
+            }}
+            className="w-full justify-center text-xs font-semibold"
           >
-            <LogOut className="h-4 w-4" />
-            <span>Secure Logout</span>
-          </button>
+            <LogOut className="size-3.5" />
+            <span>Sign out</span>
+          </Button>
         </div>
       </div>
     </div>

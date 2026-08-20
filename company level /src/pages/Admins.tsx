@@ -1,6 +1,30 @@
 import React, { useState } from 'react';
-import { Shield, Plus, Search, Mail, Phone, Lock, Edit2, Trash2 } from 'lucide-react';
-import { Modal } from '../components/common/Modal';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/common/Modal';
+import {
+  Shield,
+  Plus,
+  Search,
+  Edit2,
+  UserCheck,
+} from 'lucide-react';
 
 interface AdminUser {
   id: string;
@@ -45,151 +69,162 @@ export const Admins: React.FC = () => {
   const filtered = admins.filter(a => !search || a.name.toLowerCase().includes(search.toLowerCase()) || a.username.toLowerCase().includes(search.toLowerCase()) || a.email.toLowerCase().includes(search.toLowerCase()));
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black text-zinc-900 flex items-center gap-2">
-            <Shield className="h-5 w-5 text-primary" /> Internal Admin Accounts
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">Manage system administrators, role assignments, and dashboard access credentials</p>
+          <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Internal Admin Accounts</h1>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Manage system administrators, role assignments, and dashboard access credentials.
+          </p>
         </div>
-        <button
-          type="button"
+
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => setCreateModal(true)}
-          className="flex items-center gap-1.5 px-3.5 py-2 bg-primary hover:bg-orange-600 text-white text-xs font-bold rounded-lg shadow-sm"
         >
-          <Plus className="h-4 w-4" /> Create New Admin
-        </button>
+          <Plus className="size-4" />
+          <span>Provision Admin</span>
+        </Button>
       </div>
 
-      <div className="relative max-w-md">
-        <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-        <input
-          value={search}
-          onChange={e => setSearch(e.target.value)}
-          placeholder="Search admin name, username or email..."
-          className="w-full pl-10 pr-4 h-10 bg-white border border-zinc-200 rounded-xl text-xs font-medium outline-none focus:border-primary"
-        />
-      </div>
+      {/* ── Search Bar ── */}
+      <Card>
+        <CardContent className="p-4">
+          <div className="relative max-w-md">
+            <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+            <Input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Search admin name, username or email..."
+              className="pl-9"
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                <th className="py-3 px-4">ADMIN ID</th>
-                <th className="py-3 px-4">USERNAME / NAME</th>
-                <th className="py-3 px-4">EMAIL</th>
-                <th className="py-3 px-4">ROLE</th>
-                <th className="py-3 px-4">LAST LOGIN</th>
-                <th className="py-3 px-4">STATUS</th>
-                <th className="py-3 px-4 text-right">ACTION</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
-              {filtered.map(a => (
-                <tr key={a.id} className="hover:bg-zinc-50 transition-colors">
-                  <td className="py-3 px-4 font-mono font-bold text-zinc-900">{a.id}</td>
-                  <td className="py-3 px-4">
-                    <div className="font-bold text-zinc-900">{a.name}</div>
-                    <div className="text-[11px] text-primary font-mono font-semibold">@{a.username}</div>
-                  </td>
-                  <td className="py-3 px-4 text-zinc-600 font-mono">{a.email}</td>
-                  <td className="py-3 px-4">
-                    <span className="px-2.5 py-0.5 bg-zinc-900 text-white rounded-md font-mono text-[10px] font-bold">
-                      {a.role}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">{a.lastLogin}</td>
-                  <td className="py-3 px-4">
-                    <span className="px-2 py-0.5 bg-emerald-50 text-emerald-700 text-[10px] font-bold rounded-full">
-                      {a.status}
-                    </span>
-                  </td>
-                  <td className="py-3 px-4 text-right">
-                    <button type="button" className="text-zinc-400 hover:text-zinc-700 p-1">
-                      <Edit2 className="h-3.5 w-3.5" />
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <Modal isOpen={createModal} onClose={() => setCreateModal(false)} title="Provision New Admin Account" maxWidth="md">
-        <form onSubmit={handleCreate} className="space-y-4">
+      {/* ── Admins Table ── */}
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:px-6 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
           <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Username *</label>
-            <input
+            <CardTitle className="text-sm font-bold text-ink">Operator Directory ({filtered.length})</CardTitle>
+            <CardDescription className="text-xs text-ink-muted">
+              Active security principals with dashboard access
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Admin ID</TableHead>
+                <TableHead>Username / Name</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Role</TableHead>
+                <TableHead>Last Login</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead className="text-right">Action</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map(a => (
+                <TableRow key={a.id}>
+                  <TableCell className="font-mono font-bold text-ink whitespace-nowrap">{a.id}</TableCell>
+                  <TableCell className="whitespace-nowrap">
+                    <div className="font-semibold text-ink">{a.name}</div>
+                    <div className="text-[11px] text-primary font-mono font-medium">@{a.username}</div>
+                  </TableCell>
+                  <TableCell className="text-ink-muted font-mono text-xs">{a.email}</TableCell>
+                  <TableCell>
+                    <Badge variant="default" size="sm" className="font-mono text-[10px]">
+                      {a.role}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-ink-muted font-mono text-[11px] whitespace-nowrap">{a.lastLogin}</TableCell>
+                  <TableCell>
+                    <Badge variant={a.status === 'ACTIVE' ? 'success' : 'destructive'} size="sm">
+                      {a.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon-sm" className="text-ink-muted hover:text-ink">
+                      <Edit2 className="size-3.5" />
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </Card>
+
+      {/* ── Provision Modal ── */}
+      <Modal
+        isOpen={createModal}
+        onClose={() => setCreateModal(false)}
+        title="Provision New Admin Account"
+        subtitle="Create an internal staff operator account with designated role privileges"
+      >
+        <form onSubmit={handleCreate} className="flex flex-col gap-4 text-xs">
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Username *</label>
+            <Input
               type="text"
               required
               value={newAdmin.username}
               onChange={e => setNewAdmin(p => ({ ...p, username: e.target.value }))}
               placeholder="e.g. anand_ops"
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-primary"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Full Name</label>
-            <input
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Full Name</label>
+            <Input
               type="text"
               value={newAdmin.name}
               onChange={e => setNewAdmin(p => ({ ...p, name: e.target.value }))}
               placeholder="e.g. Anand Sharma"
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-primary"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Email Address *</label>
-            <input
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Email Address *</label>
+            <Input
               type="email"
               required
               value={newAdmin.email}
               onChange={e => setNewAdmin(p => ({ ...p, email: e.target.value }))}
-              placeholder="e.g. anand.s@tuckit.in"
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-primary"
+              placeholder="anand@tuckit.in"
             />
           </div>
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Role Permission Preset</label>
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Assigned Role</label>
             <select
               value={newAdmin.role}
               onChange={e => setNewAdmin(p => ({ ...p, role: e.target.value }))}
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-semibold"
+              className="flex h-9 rounded-md border border-hairline bg-white px-3 py-1 text-xs text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
-              <option value="OPERATIONS">OPERATIONS</option>
-              <option value="SUPPORT_AGENT">SUPPORT_AGENT</option>
-              <option value="FINANCE">FINANCE</option>
-              <option value="SUPERADMIN">SUPERADMIN</option>
+              <option value="OPERATIONS">OPERATIONS (Fleet Diagnostics & Overrides)</option>
+              <option value="SUPPORT_AGENT">SUPPORT_AGENT (Customer Service & Unlock)</option>
+              <option value="FINANCE">FINANCE (Reports & Refunds)</option>
+              <option value="SUPERADMIN">SUPERADMIN (Full Root Privileges)</option>
             </select>
           </div>
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 mb-1">Temporary Password *</label>
-            <input
-              type="password"
-              required
-              value={newAdmin.password}
-              onChange={e => setNewAdmin(p => ({ ...p, password: e.target.value }))}
-              placeholder="••••••••"
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-primary"
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-2">
-            <button
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-hairline-soft">
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setCreateModal(false)}
-              className="px-3.5 py-2 border border-zinc-200 text-zinc-700 text-xs font-bold rounded-xl"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-4 py-2 bg-primary hover:bg-orange-600 text-white text-xs font-bold rounded-xl shadow-sm"
+              variant="primary"
             >
               Create Account
-            </button>
+            </Button>
           </div>
         </form>
       </Modal>

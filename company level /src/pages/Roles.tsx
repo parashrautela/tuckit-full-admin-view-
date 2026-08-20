@@ -1,24 +1,28 @@
 import React, { useState } from 'react';
-import { useRealtime } from '../context/RealtimeContext';
-import { StatusBadge } from '../components/common/StatusBadge';
-import { Modal } from '../components/common/Modal';
+import { useRealtime } from '@/context/RealtimeContext';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/common/Modal';
+import { Separator } from '@/components/ui/separator';
 import {
   ShieldCheck,
   Lock,
   Check,
   X,
   Plus,
-  ChevronDown,
   ChevronRight,
   Key,
   Shield,
   Layers,
-  SlidersHorizontal,
   Settings,
-  Eye,
-  FileSpreadsheet,
-  RotateCcw,
-  Zap,
 } from 'lucide-react';
 
 interface PermissionCategory {
@@ -152,181 +156,187 @@ export const Roles: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="bg-white rounded-2xl border border-zinc-200 shadow-2xs p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2.5 bg-indigo-600 rounded-xl text-white shadow-sm">
-            <ShieldCheck className="h-6 w-6" />
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Role Engineering & Granular RBAC</h1>
+            <Badge variant="outline" size="sm" className="font-mono">
+              SECURITY POLICIES
+            </Badge>
           </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl font-black text-zinc-900 tracking-tight">Role Engineering & Granular RBAC</h1>
-              <span className="px-2 py-0.5 bg-indigo-100 text-indigo-800 text-[10px] font-black rounded-full uppercase">
-                SECURITY ARCHITECTURE
-              </span>
-            </div>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              Configure fine-grained system access policies, hardware controls, and PII protection slices
-            </p>
-          </div>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Configure fine-grained system access policies, hardware controls, and PII protection slices.
+          </p>
         </div>
 
-        <button
-          type="button"
+        <Button
+          variant="primary"
+          size="sm"
           onClick={() => setCreateModal(true)}
-          className="flex items-center gap-1.5 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl transition-all shadow-sm shrink-0"
         >
-          <Plus className="h-4 w-4" /> Create Custom Role
-        </button>
+          <Plus className="size-4" />
+          <span>Create Custom Role</span>
+        </Button>
       </div>
 
-      {/* Main 2-Column Split: Roles List on Left & Granular Permission Matrix on Right */}
+      {/* ── Main 2-Column Split ── */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Role Selector Cards */}
-        <div className="lg:col-span-4 space-y-3">
-          <div className="text-xs font-bold text-zinc-400 uppercase tracking-wider px-1">
+        <div className="lg:col-span-4 flex flex-col gap-3">
+          <span className="text-[11px] font-bold text-ink-muted uppercase tracking-wider px-1">
             Configured System Roles ({roles.length})
-          </div>
+          </span>
 
           {roles.map(r => {
             const isSelected = selectedRole.id === r.id;
             return (
-              <div
+              <Card
                 key={r.id}
                 onClick={() => setSelectedRole(r)}
-                className={`p-4 rounded-2xl border cursor-pointer transition-all ${
+                className={`cursor-pointer transition-all ${
                   isSelected
-                    ? 'bg-indigo-50/70 border-indigo-300 shadow-md ring-2 ring-indigo-500/20'
-                    : 'bg-white border-zinc-200 hover:border-zinc-300 shadow-2xs hover:shadow-sm'
+                    ? 'border-primary ring-1 ring-primary/30 bg-orange-50/20 shadow-xs'
+                    : 'hover:border-zinc-300 shadow-2xs'
                 }`}
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Lock className={`h-4 w-4 ${isSelected ? 'text-indigo-600' : 'text-zinc-400'}`} />
-                    <span className="text-sm font-black text-zinc-900 font-mono">{r.name}</span>
+                <CardContent className="p-4 flex flex-col gap-2">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Lock className={`size-4 ${isSelected ? 'text-primary' : 'text-ink-subtle'}`} />
+                      <span className="text-sm font-bold text-ink font-mono">{r.name}</span>
+                    </div>
+                    <Badge variant="secondary" size="sm">
+                      {r.userCount} Users
+                    </Badge>
                   </div>
-                  <span className="px-2 py-0.5 bg-white border border-zinc-200 text-zinc-700 text-[10px] font-bold rounded-full shadow-2xs">
-                    {r.userCount} Users
-                  </span>
-                </div>
 
-                <p className="text-xs text-zinc-500 mt-2 leading-relaxed line-clamp-2">{r.description}</p>
+                  <p className="text-xs text-ink-muted leading-relaxed line-clamp-2">{r.description}</p>
 
-                <div className="mt-3 pt-2 border-t border-zinc-200/60 flex items-center justify-between text-[11px] font-semibold">
-                  <span className="text-indigo-700 font-mono">{r.permissions.length} Permissions Active</span>
-                  <ChevronRight className={`h-3.5 w-3.5 ${isSelected ? 'text-indigo-600' : 'text-zinc-400'}`} />
-                </div>
-              </div>
+                  <div className="pt-2 border-t border-hairline-soft flex items-center justify-between text-[11px]">
+                    <span className="text-primary font-semibold font-mono">{r.permissions.length} Permissions</span>
+                    <ChevronRight className={`size-3.5 ${isSelected ? 'text-primary' : 'text-ink-subtle'}`} />
+                  </div>
+                </CardContent>
+              </Card>
             );
           })}
         </div>
 
-        {/* Right Column: Interactive Permission Policy Matrix */}
-        <div className="lg:col-span-8 bg-white rounded-2xl border border-zinc-200 shadow-2xs p-6 space-y-6">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-zinc-100">
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-mono font-bold text-zinc-400">{selectedRole.id}</span>
-                <h2 className="text-lg font-black text-zinc-900">{selectedRole.name}</h2>
-              </div>
-              <p className="text-xs text-zinc-500 mt-0.5">{selectedRole.description}</p>
-            </div>
-            <span className="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs font-bold rounded-xl self-start border border-emerald-200">
-              {selectedRole.permissions.length} Active Grants
-            </span>
-          </div>
-
-          {/* Categories Grid */}
-          <div className="space-y-5">
-            {PERMISSION_CATEGORIES.map(cat => (
-              <div key={cat.id} className="p-4 bg-zinc-50 rounded-2xl border border-zinc-200 space-y-3">
-                <div className="text-xs font-bold text-zinc-800 uppercase tracking-wider flex items-center gap-2">
-                  <Shield className="h-3.5 w-3.5 text-indigo-600" /> {cat.name}
+        {/* Right Column: Permission Matrix */}
+        <div className="lg:col-span-8">
+          <Card>
+            <CardHeader className="p-5 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <ShieldCheck className="size-4 text-primary" />
+                  <CardTitle className="text-sm font-bold text-ink">
+                    Permission Matrix: <span className="font-mono text-primary">{selectedRole.name}</span>
+                  </CardTitle>
                 </div>
+                <CardDescription className="text-xs text-ink-muted mt-0.5">
+                  {selectedRole.description}
+                </CardDescription>
+              </div>
+              <Badge variant="outline" className="font-mono">
+                {selectedRole.permissions.length} Allowed
+              </Badge>
+            </CardHeader>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  {cat.permissions.map(p => {
-                    const isGranted = selectedRole.permissions.includes(p.id);
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => handleTogglePerm(p.id)}
-                        className={`p-3 rounded-xl border flex items-start gap-3 cursor-pointer select-none transition-all ${
-                          isGranted
-                            ? 'bg-white border-indigo-300 text-zinc-900 shadow-2xs'
-                            : 'bg-zinc-100/50 border-transparent text-zinc-400 hover:bg-zinc-100'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={isGranted}
-                          onChange={() => {}}
-                          className="mt-0.5 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 h-4 w-4"
-                        />
-                        <div>
-                          <div className="text-xs font-bold">{p.label}</div>
-                          <div className="text-[11px] text-zinc-500 mt-0.5">{p.description}</div>
+            <CardContent className="p-5 flex flex-col gap-6">
+              {PERMISSION_CATEGORIES.map(category => (
+                <div key={category.id} className="flex flex-col gap-2.5">
+                  <div className="flex items-center gap-2">
+                    <Layers className="size-3.5 text-ink-subtle" />
+                    <h3 className="text-xs font-bold uppercase tracking-wider text-ink">
+                      {category.name}
+                    </h3>
+                  </div>
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+                    {category.permissions.map(perm => {
+                      const isGranted = selectedRole.permissions.includes(perm.id);
+                      return (
+                        <div
+                          key={perm.id}
+                          onClick={() => handleTogglePerm(perm.id)}
+                          className={`p-3 rounded-lg border text-xs cursor-pointer transition-all flex items-start gap-2.5 select-none ${
+                            isGranted
+                              ? 'bg-emerald-50/40 border-emerald-200 text-ink'
+                              : 'bg-zinc-50/40 border-hairline-soft text-ink-muted hover:bg-zinc-100/60'
+                          }`}
+                        >
+                          <div
+                            className={`size-4 rounded flex items-center justify-center shrink-0 mt-0.5 transition-colors ${
+                              isGranted ? 'bg-emerald-600 text-white' : 'border border-hairline bg-white'
+                            }`}
+                          >
+                            {isGranted && <Check className="size-3 stroke-[3]" />}
+                          </div>
+
+                          <div className="flex flex-col gap-0.5 min-w-0">
+                            <span className={`font-semibold ${isGranted ? 'text-ink' : 'text-ink-muted'}`}>
+                              {perm.label}
+                            </span>
+                            <span className="text-[11px] text-ink-subtle leading-tight">
+                              {perm.description}
+                            </span>
+                          </div>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </CardContent>
+          </Card>
         </div>
       </div>
 
-      {/* Create Role Modal */}
+      {/* ── Create Role Modal ── */}
       <Modal
         isOpen={createModal}
         onClose={() => setCreateModal(false)}
-        title="Create Custom RBAC Role Policy"
-        maxWidth="lg"
+        title="Engineer New RBAC Role"
+        subtitle="Define policy name and select base permissions for this role definition"
       >
-        <form onSubmit={handleCreateRole} className="space-y-4">
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1">
-              Role Identifier / Name *
-            </label>
-            <input
+        <form onSubmit={handleCreateRole} className="flex flex-col gap-4 text-xs">
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Role Identifier *</label>
+            <Input
               type="text"
               required
               value={newRoleName}
               onChange={e => setNewRoleName(e.target.value)}
-              placeholder="e.g. REGIONAL_SUPERVISOR"
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs font-mono font-bold outline-none focus:border-indigo-600"
+              placeholder="e.g. TERMINAL_TECHNICIAN"
             />
           </div>
 
-          <div>
-            <label className="block text-xs font-bold text-zinc-700 uppercase tracking-wider mb-1">
-              Policy Description
-            </label>
-            <input
+          <div className="flex flex-col gap-1.5">
+            <label className="font-bold text-ink uppercase tracking-wider text-[11px]">Description</label>
+            <Input
               type="text"
               value={newRoleDesc}
               onChange={e => setNewRoleDesc(e.target.value)}
-              placeholder="Describe access boundary and assigned staff scope..."
-              className="w-full h-10 px-3 bg-zinc-50 border border-zinc-200 rounded-xl text-xs outline-none focus:border-indigo-600"
+              placeholder="Field hardware maintenance engineer..."
             />
           </div>
 
-          <div className="flex items-center justify-end gap-2 pt-3 border-t border-zinc-100">
-            <button
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-hairline-soft">
+            <Button
               type="button"
+              variant="ghost"
               onClick={() => setCreateModal(false)}
-              className="px-4 py-2 text-xs font-bold text-zinc-600 hover:bg-zinc-100 rounded-xl transition-colors"
             >
               Cancel
-            </button>
-            <button
+            </Button>
+            <Button
               type="submit"
-              className="px-5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-sm transition-all"
+              variant="primary"
             >
-              Initialize Role Policy
-            </button>
+              Create Role Policy
+            </Button>
           </div>
         </form>
       </Modal>

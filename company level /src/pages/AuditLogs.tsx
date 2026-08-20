@@ -1,7 +1,30 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { ShieldCheck, Search, Filter, Download, Eye, AlertTriangle, CheckCircle2, Info } from 'lucide-react';
-import { Modal } from '../components/common/Modal';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/common/Modal';
+import {
+  ShieldCheck,
+  Search,
+  Download,
+  Eye,
+} from 'lucide-react';
 
 interface AuditLog {
   id: string;
@@ -55,107 +78,132 @@ export const AuditLogs: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl font-black text-zinc-900 flex items-center gap-2">
-            <ShieldCheck className="h-5 w-5 text-primary" /> Enterprise System Audit Trail
-          </h1>
-          <p className="text-xs text-zinc-500 mt-1">Immutable security event logging, hardware commands, rate modifications, and staff actions</p>
-        </div>
-        <button className="flex items-center gap-1.5 px-3.5 py-2 bg-zinc-900 hover:bg-black text-white text-xs font-bold rounded-lg transition-colors">
-          <Download className="h-3.5 w-3.5" /> Export Audit Log
-        </button>
-      </div>
-
-      {/* Filter Row */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-          <input
-            value={search}
-            onChange={e => updateParam('search', e.target.value)}
-            placeholder="Search by actor, action, or target asset..."
-            className="w-full pl-10 pr-4 h-10 bg-white border border-zinc-200 rounded-lg text-xs font-medium outline-none focus:border-primary"
-          />
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Enterprise Audit Trail</h1>
+            <Badge variant="outline" size="sm" className="font-mono">
+              IMMUTABLE LOGS
+            </Badge>
+          </div>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Cryptographically signed event trail: hardware commands, overrides, pricing changes, and admin actions.
+          </p>
         </div>
 
-        <select
-          value={severityFilter}
-          onChange={e => updateParam('severity', e.target.value)}
-          className="h-10 px-3 bg-white border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-800 outline-none focus:border-primary"
-        >
-          <option value="ALL">All Severities</option>
-          <option value="CRITICAL">Critical</option>
-          <option value="WARN">Warning</option>
-          <option value="INFO">Info</option>
-        </select>
+        <Button variant="default" size="sm">
+          <Download className="size-3.5" />
+          <span>Export Audit Log</span>
+        </Button>
       </div>
 
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                <th className="py-3 px-4">LOG ID</th>
-                <th className="py-3 px-4">TIMESTAMP</th>
-                <th className="py-3 px-4">ACTOR / ROLE</th>
-                <th className="py-3 px-4">ACTION EXECUTED</th>
-                <th className="py-3 px-4">TARGET ASSET</th>
-                <th className="py-3 px-4">IP ADDRESS</th>
-                <th className="py-3 px-4">SEVERITY</th>
-                <th className="py-3 px-4 text-right">DETAILS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
+      {/* ── Filter Row ── */}
+      <Card>
+        <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+            <Input
+              value={search}
+              onChange={e => updateParam('search', e.target.value)}
+              placeholder="Search by actor, action, or target asset..."
+              className="pl-9"
+            />
+          </div>
+
+          <select
+            value={severityFilter}
+            onChange={e => updateParam('severity', e.target.value)}
+            className="flex h-9 rounded-md border border-hairline bg-white px-3 py-1 text-xs font-semibold text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-48"
+          >
+            <option value="ALL">All Severities</option>
+            <option value="CRITICAL">Critical Only</option>
+            <option value="WARN">Warning Only</option>
+            <option value="INFO">Info Only</option>
+          </select>
+        </CardContent>
+      </Card>
+
+      {/* ── Audit Logs Table ── */}
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:px-6 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-sm font-bold text-ink">Security Event Stream ({filtered.length})</CardTitle>
+            <CardDescription className="text-xs text-ink-muted">
+              Live AWS CloudWatch & PostgreSQL event streams
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Log ID</TableHead>
+                <TableHead>Timestamp</TableHead>
+                <TableHead>Actor / Role</TableHead>
+                <TableHead>Action Executed</TableHead>
+                <TableHead>Target Asset</TableHead>
+                <TableHead>IP Address</TableHead>
+                <TableHead>Severity</TableHead>
+                <TableHead className="text-right">Details</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filtered.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-8 text-center text-zinc-400">
-                    No audit logs matching current filter.
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={8} className="py-8 text-center text-ink-muted font-medium">
+                    No audit logs matching current filter criteria.
+                  </TableCell>
+                </TableRow>
               ) : (
                 filtered.map(l => (
-                  <tr key={l.id} className="hover:bg-zinc-50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-zinc-900">{l.id}</td>
-                    <td className="py-3 px-4 text-zinc-500 font-mono text-[11px]">{l.timestamp}</td>
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-zinc-800">{l.adminName}</div>
-                      <div className="text-[10px] font-bold text-orange-600 uppercase">{l.adminRole}</div>
-                    </td>
-                    <td className="py-3 px-4 font-mono font-semibold text-zinc-800">{l.action}</td>
-                    <td className="py-3 px-4 text-zinc-600 font-mono text-[11px]">{l.target}</td>
-                    <td className="py-3 px-4 font-mono text-zinc-400 text-[11px]">{l.ipAddress}</td>
-                    <td className="py-3 px-4">
-                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                        l.severity === 'CRITICAL'
-                          ? 'bg-red-50 text-red-700 border border-red-200'
-                          : l.severity === 'WARN'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200'
-                          : 'bg-blue-50 text-blue-700 border border-blue-200'
-                      }`}>
+                  <TableRow key={l.id}>
+                    <TableCell className="font-mono font-bold text-ink whitespace-nowrap">{l.id}</TableCell>
+                    <TableCell className="text-ink-muted font-mono text-[11px] whitespace-nowrap">{l.timestamp}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="font-semibold text-ink">{l.adminName}</div>
+                      <div className="text-[10px] font-bold text-primary uppercase font-mono">{l.adminRole}</div>
+                    </TableCell>
+                    <TableCell className="font-mono font-semibold text-ink whitespace-nowrap">{l.action}</TableCell>
+                    <TableCell className="text-ink-muted font-mono text-xs max-w-[200px] truncate">{l.target}</TableCell>
+                    <TableCell className="font-mono text-ink-subtle text-xs whitespace-nowrap">{l.ipAddress}</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant={
+                          l.severity === 'CRITICAL'
+                            ? 'destructive'
+                            : l.severity === 'WARN'
+                            ? 'warning'
+                            : 'info'
+                        }
+                        size="sm"
+                        className="font-mono"
+                      >
                         {l.severity}
-                      </span>
-                    </td>
-                    <td className="py-3 px-4 text-right">
-                      <button
-                        type="button"
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="text-right whitespace-nowrap">
+                      <Button
+                        variant="ghost"
+                        size="icon-sm"
                         onClick={() => setSelectedLog(l)}
-                        className="p-1.5 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-md transition-colors"
+                        className="text-ink-muted hover:text-ink"
                         title="View Full Details"
                       >
-                        <Eye className="h-4 w-4" />
-                      </button>
-                    </td>
-                  </tr>
+                        <Eye className="size-3.5" />
+                      </Button>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
 
-      {/* Log Details Modal */}
+      {/* ── Log Details Modal ── */}
       {selectedLog && (
         <Modal
           isOpen={!!selectedLog}
@@ -163,29 +211,40 @@ export const AuditLogs: React.FC = () => {
           title={`Audit Log Entry — ${selectedLog.id}`}
           subtitle={`${selectedLog.action} executed by ${selectedLog.adminName} at ${selectedLog.timestamp}`}
         >
-          <div className="space-y-3 text-xs">
-            <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-1.5">
+          <div className="flex flex-col gap-3 text-xs">
+            <div className="p-3.5 bg-zinc-50 border border-hairline rounded-xl flex flex-col gap-1.5">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Action:</span>
-                <span className="font-mono font-bold text-zinc-900">{selectedLog.action}</span>
+                <span className="text-ink-muted">Action:</span>
+                <span className="font-mono font-bold text-ink">{selectedLog.action}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Target Asset:</span>
-                <span className="font-mono text-zinc-800">{selectedLog.target}</span>
+                <span className="text-ink-muted">Target Asset:</span>
+                <span className="font-mono text-ink">{selectedLog.target}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Operator IP:</span>
-                <span className="font-mono text-zinc-600">{selectedLog.ipAddress}</span>
+                <span className="text-ink-muted">Operator IP:</span>
+                <span className="font-mono text-ink-subtle">{selectedLog.ipAddress}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Severity:</span>
-                <span className="font-bold">{selectedLog.severity}</span>
+                <span className="text-ink-muted">Severity:</span>
+                <Badge
+                  variant={
+                    selectedLog.severity === 'CRITICAL'
+                      ? 'destructive'
+                      : selectedLog.severity === 'WARN'
+                      ? 'warning'
+                      : 'info'
+                  }
+                  size="sm"
+                >
+                  {selectedLog.severity}
+                </Badge>
               </div>
             </div>
 
-            <div className="p-3 bg-zinc-50 rounded-lg border border-zinc-100">
-              <span className="text-[10px] font-bold text-zinc-400 uppercase block mb-1">Payload & Event Details</span>
-              <p className="text-zinc-700 leading-relaxed font-mono text-[11px]">{selectedLog.details}</p>
+            <div className="p-3 bg-zinc-50 rounded-lg border border-hairline flex flex-col gap-1">
+              <span className="text-[10px] font-bold text-ink-subtle uppercase">Payload & Event Details</span>
+              <p className="text-ink leading-relaxed font-mono text-[11px]">{selectedLog.details}</p>
             </div>
           </div>
         </Modal>

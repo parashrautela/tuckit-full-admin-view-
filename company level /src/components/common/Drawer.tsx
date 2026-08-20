@@ -1,5 +1,12 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import React from 'react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from '@/components/ui/sheet';
+import { cn } from '@/lib/utils';
 
 interface DrawerProps {
   isOpen: boolean;
@@ -18,52 +25,27 @@ export const Drawer: React.FC<DrawerProps> = ({
   children,
   width = 'md',
 }) => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   const widthClass = {
-    md: 'max-w-md',
-    lg: 'max-w-xl',
-    xl: 'max-w-2xl',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-lg',
+    xl: 'sm:max-w-xl',
   }[width];
 
   return (
-    <div className="fixed inset-0 z-[100] flex justify-end">
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity animate-in fade-in duration-300"
-        onClick={onClose}
-      />
-      {/* DESIGN.md: hairline border, surface-1 bg, minimal shadow */}
-      <div
-        className={`relative w-full ${widthClass} bg-white h-full shadow-card border-l border-hairline z-10 flex flex-col animate-in slide-in-from-right duration-300`}
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-hairline-soft">
-          <div>
-            <h3 className="text-card-title text-ink">{title}</h3>
-            {subtitle && <p className="text-body-sm text-ink-muted mt-0.5">{subtitle}</p>}
-          </div>
-          <button
-            onClick={onClose}
-            className="text-ink-subtle hover:text-ink hover:bg-zinc-100 p-2 rounded-md transition-colors"
-          >
-            <X className="h-5 w-5" />
-          </button>
+    <Sheet open={isOpen} onOpenChange={open => !open && onClose()}>
+      <SheetContent className={cn("p-0 flex flex-col gap-0 border-l border-zinc-200 shadow-xl", widthClass)}>
+        <SheetHeader className="px-6 py-4 border-b border-zinc-100 bg-white">
+          <SheetTitle className="text-base font-bold tracking-tight text-zinc-900">{title}</SheetTitle>
+          {subtitle && (
+            <SheetDescription className="text-xs text-zinc-500 mt-0.5">
+              {subtitle}
+            </SheetDescription>
+          )}
+        </SheetHeader>
+        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar bg-white">
+          {children}
         </div>
-        <div className="flex-1 p-6 overflow-y-auto custom-scrollbar">{children}</div>
-      </div>
-    </div>
+      </SheetContent>
+    </Sheet>
   );
 };

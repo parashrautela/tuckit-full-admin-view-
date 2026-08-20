@@ -1,7 +1,30 @@
 import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { CreditCard, Search, CheckCircle2, XCircle, AlertCircle, Eye, ArrowUpRight, Filter } from 'lucide-react';
-import { Modal } from '../components/common/Modal';
+import {
+  CreditCard,
+  Search,
+  CheckCircle2,
+  XCircle,
+} from 'lucide-react';
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent,
+} from '@/components/ui/card';
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Modal } from '@/components/common/Modal';
 
 interface RefundRequest {
   id: string;
@@ -63,123 +86,139 @@ export const RefundRequests: React.FC = () => {
   const pendingCount = requests.filter(r => r.status === 'PENDING').length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    <div className="flex flex-col gap-6">
+      {/* ── Page Header ── */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="text-xl font-black text-zinc-900 flex items-center gap-2">
-              <CreditCard className="h-5 w-5 text-primary" /> Refund Requests Queue
-            </h1>
-            <span className="px-2 py-0.5 bg-amber-500 text-white text-[10px] font-black rounded-full">
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-xl sm:text-2xl font-bold tracking-tight text-ink">Refund Claims Queue</h1>
+            <Badge variant={pendingCount > 0 ? 'warning' : 'outline'} size="sm" className="font-mono">
               {pendingCount} PENDING
-            </span>
+            </Badge>
           </div>
-          <p className="text-xs text-zinc-500 mt-1">Review, approve, or decline customer refund claims and transaction reversals</p>
+          <p className="text-xs sm:text-sm text-ink-muted mt-0.5">
+            Review, audit, approve, or decline customer refund requests and payment reversals.
+          </p>
         </div>
       </div>
 
-      {/* Search & Status Filter Bar */}
-      <div className="flex flex-col sm:flex-row items-center gap-3">
-        <div className="relative flex-1 w-full">
-          <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
-          <input
-            value={search}
-            onChange={e => updateParam('search', e.target.value)}
-            placeholder="Search by customer name, phone, booking ID, or terminal..."
-            className="w-full pl-9 pr-3 h-10 bg-white border border-zinc-200 rounded-lg text-xs font-medium outline-none focus:border-primary"
-          />
-        </div>
-        <select
-          value={statusFilter}
-          onChange={e => updateParam('status', e.target.value)}
-          className="h-10 px-3 bg-white border border-zinc-200 rounded-lg text-xs font-semibold text-zinc-800 outline-none focus:border-primary"
-        >
-          <option value="PENDING">Status: Pending ({pendingCount})</option>
-          <option value="APPROVED">Status: Approved</option>
-          <option value="REJECTED">Status: Rejected</option>
-          <option value="ALL">All Statuses</option>
-        </select>
-      </div>
+      {/* ── Search & Filter Bar ── */}
+      <Card>
+        <CardContent className="p-4 flex flex-col sm:flex-row items-center gap-3">
+          <div className="relative flex-1 w-full">
+            <Search className="absolute left-3 top-2.5 size-4 text-ink-subtle" />
+            <Input
+              value={search}
+              onChange={e => updateParam('search', e.target.value)}
+              placeholder="Search by customer name, phone, booking ID, or terminal..."
+              className="pl-9"
+            />
+          </div>
+          <select
+            value={statusFilter}
+            onChange={e => updateParam('status', e.target.value)}
+            className="flex h-9 rounded-md border border-hairline bg-white px-3 py-1 text-xs font-semibold text-ink shadow-2xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary w-full sm:w-56"
+          >
+            <option value="PENDING">Status: Pending ({pendingCount})</option>
+            <option value="APPROVED">Status: Approved</option>
+            <option value="REJECTED">Status: Rejected</option>
+            <option value="ALL">All Statuses</option>
+          </select>
+        </CardContent>
+      </Card>
 
       {toastMessage && (
-        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold rounded-xl flex items-center gap-2 animate-in fade-in">
-          <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-          {toastMessage}
+        <div className="p-3 bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold rounded-xl flex items-center gap-2 animate-in fade-in">
+          <CheckCircle2 className="size-4 text-emerald-600 shrink-0" />
+          <span>{toastMessage}</span>
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-zinc-200 shadow-2xs overflow-hidden">
-        <div className="overflow-x-auto custom-scrollbar">
-          <table className="w-full text-left text-xs">
-            <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200 text-[11px] font-bold text-zinc-500 uppercase tracking-wider">
-                <th className="py-3 px-4">REFUND ID</th>
-                <th className="py-3 px-4">BOOKING</th>
-                <th className="py-3 px-4">CUSTOMER</th>
-                <th className="py-3 px-4">TERMINAL</th>
-                <th className="py-3 px-4">AMOUNT</th>
-                <th className="py-3 px-4">REASON</th>
-                <th className="py-3 px-4">REQUESTED</th>
-                <th className="py-3 px-4 text-right">ACTIONS</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-zinc-100">
+      <Card className="overflow-hidden">
+        <CardHeader className="p-4 sm:px-6 border-b border-hairline-soft bg-zinc-50/50 flex flex-row items-center justify-between">
+          <div>
+            <CardTitle className="text-sm font-bold text-ink">
+              Refund Claims List ({filteredRequests.length})
+            </CardTitle>
+            <CardDescription className="text-xs text-ink-muted">
+              Live queue connected to gateway reconciliations
+            </CardDescription>
+          </div>
+        </CardHeader>
+
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Refund ID</TableHead>
+                <TableHead>Booking</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Terminal</TableHead>
+                <TableHead>Amount</TableHead>
+                <TableHead>Reason</TableHead>
+                <TableHead>Requested</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
               {filteredRequests.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-8 text-center text-zinc-400 font-medium">
-                    No refund requests matching current filter!
-                  </td>
-                </tr>
+                <TableRow>
+                  <TableCell colSpan={8} className="py-8 text-center text-ink-muted font-medium">
+                    No refund requests matching current filter criteria.
+                  </TableCell>
+                </TableRow>
               ) : (
                 filteredRequests.map(r => (
-                  <tr key={r.id} className="hover:bg-zinc-50 transition-colors">
-                    <td className="py-3 px-4 font-mono font-bold text-zinc-900">{r.id}</td>
-                    <td className="py-3 px-4 font-mono font-semibold text-primary">{r.bookingId}</td>
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-zinc-800">{r.customerName}</div>
-                      <div className="text-[11px] text-zinc-400 font-mono">{r.phone}</div>
-                    </td>
-                    <td className="py-3 px-4 font-mono text-zinc-700 font-semibold">{r.terminalCode}</td>
-                    <td className="py-3 px-4 font-black text-zinc-900">₹{r.amount}</td>
-                    <td className="py-3 px-4 text-zinc-600 max-w-[220px] truncate" title={r.reason}>
+                  <TableRow key={r.id}>
+                    <TableCell className="font-mono font-bold text-ink whitespace-nowrap">{r.id}</TableCell>
+                    <TableCell className="font-mono font-semibold text-primary whitespace-nowrap">{r.bookingId}</TableCell>
+                    <TableCell className="whitespace-nowrap">
+                      <div className="font-semibold text-ink">{r.customerName}</div>
+                      <div className="text-[11px] text-ink-subtle font-mono">{r.phone}</div>
+                    </TableCell>
+                    <TableCell className="font-mono text-ink font-medium whitespace-nowrap">{r.terminalCode}</TableCell>
+                    <TableCell className="font-bold text-ink font-mono whitespace-nowrap">₹{r.amount}</TableCell>
+                    <TableCell className="text-ink-muted max-w-[220px] truncate" title={r.reason}>
                       {r.reason}
-                    </td>
-                    <td className="py-3 px-4 text-zinc-400 font-mono text-[11px]">{r.requestedAt}</td>
-                    <td className="py-3 px-4 text-right">
+                    </TableCell>
+                    <TableCell className="text-ink-subtle font-mono text-[11px] whitespace-nowrap">{r.requestedAt}</TableCell>
+                    <TableCell className="text-right whitespace-nowrap">
                       {r.status === 'PENDING' ? (
-                        <div className="flex items-center justify-end gap-2">
-                          <button
-                            type="button"
+                        <div className="flex items-center justify-end gap-1.5">
+                          <Button
+                            variant="default"
+                            size="sm"
                             onClick={() => setActionModal({ isOpen: true, type: 'APPROVE', item: r })}
-                            className="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                            className="bg-emerald-600 hover:bg-emerald-700 text-white h-7 px-2.5 text-xs font-bold"
                           >
-                            <CheckCircle2 className="h-3 w-3" /> Approve
-                          </button>
-                          <button
-                            type="button"
+                            <CheckCircle2 className="size-3" />
+                            <span>Approve</span>
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="sm"
                             onClick={() => setActionModal({ isOpen: true, type: 'REJECT', item: r })}
-                            className="px-2.5 py-1 bg-red-600 hover:bg-red-700 text-white text-[11px] font-bold rounded-lg transition-colors flex items-center gap-1"
+                            className="h-7 px-2.5 text-xs font-bold"
                           >
-                            <XCircle className="h-3 w-3" /> Reject
-                          </button>
+                            <XCircle className="size-3" />
+                            <span>Reject</span>
+                          </Button>
                         </div>
                       ) : (
-                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold font-mono ${
-                          r.status === 'APPROVED' ? 'bg-emerald-50 text-emerald-700' : 'bg-red-50 text-red-700'
-                        }`}>
+                        <Badge variant={r.status === 'APPROVED' ? 'success' : 'destructive'} size="sm" className="font-mono">
                           {r.status}
-                        </span>
+                        </Badge>
                       )}
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 ))
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
-      </div>
+      </Card>
 
-      {/* Action Dialog */}
+      {/* ── Action Dialog ── */}
       {actionModal.isOpen && actionModal.item && (
         <Modal
           isOpen={actionModal.isOpen}
@@ -187,52 +226,49 @@ export const RefundRequests: React.FC = () => {
           title={`${actionModal.type === 'APPROVE' ? 'Approve' : 'Reject'} Refund ${actionModal.item.id}`}
           subtitle={`Customer: ${actionModal.item.customerName} • Booking ${actionModal.item.bookingId}`}
         >
-          <div className="space-y-4 text-xs">
-            <div className="p-3.5 bg-zinc-50 border border-zinc-200 rounded-xl space-y-1">
+          <div className="flex flex-col gap-4 text-xs">
+            <div className="p-3.5 bg-zinc-50 border border-hairline rounded-xl flex flex-col gap-1.5">
               <div className="flex justify-between">
-                <span className="text-zinc-500">Claim Amount:</span>
-                <span className="font-bold text-zinc-900 text-sm">₹{actionModal.item.amount}</span>
+                <span className="text-ink-muted">Claim Amount:</span>
+                <span className="font-bold text-ink text-sm">₹{actionModal.item.amount}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Reported Issue:</span>
-                <span className="font-semibold text-zinc-800">{actionModal.item.reason}</span>
+                <span className="text-ink-muted">Reported Issue:</span>
+                <span className="font-semibold text-ink">{actionModal.item.reason}</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-zinc-500">Gateway Ref:</span>
-                <span className="font-mono text-zinc-600">{actionModal.item.paymentGatewayRef}</span>
+                <span className="text-ink-muted">Gateway Ref:</span>
+                <span className="font-mono text-ink-subtle">{actionModal.item.paymentGatewayRef}</span>
               </div>
             </div>
 
-            <div>
-              <label className="block text-[11px] font-bold text-zinc-700 uppercase tracking-wider mb-1">
-                Audit Note / Reason
+            <div className="flex flex-col gap-1.5">
+              <label className="text-[11px] font-bold text-ink uppercase tracking-wider">
+                Audit Note / Verification Reason
               </label>
               <textarea
                 value={adminNote}
                 onChange={e => setAdminNote(e.target.value)}
                 placeholder="State verification note for financial ledger..."
                 rows={2}
-                className="w-full p-2.5 bg-white border border-zinc-200 rounded-lg text-xs outline-none focus:border-primary"
+                className="w-full p-2.5 bg-white border border-hairline rounded-md text-xs outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
 
-            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
-              <button
-                type="button"
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-hairline-soft">
+              <Button
+                variant="ghost"
                 onClick={() => setActionModal({ isOpen: false, type: 'APPROVE', item: null })}
-                className="px-3 py-1.5 text-zinc-600 hover:bg-zinc-100 rounded-lg font-semibold"
               >
                 Cancel
-              </button>
-              <button
-                type="button"
+              </Button>
+              <Button
+                variant={actionModal.type === 'APPROVE' ? 'default' : 'destructive'}
                 onClick={() => handleAction(actionModal.type === 'APPROVE' ? 'APPROVED' : 'REJECTED')}
-                className={`px-3.5 py-1.5 text-white font-bold rounded-lg shadow-sm ${
-                  actionModal.type === 'APPROVE' ? 'bg-emerald-600 hover:bg-emerald-700' : 'bg-red-600 hover:bg-red-700'
-                }`}
+                className={actionModal.type === 'APPROVE' ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : ''}
               >
                 Confirm {actionModal.type === 'APPROVE' ? 'Approval' : 'Rejection'}
-              </button>
+              </Button>
             </div>
           </div>
         </Modal>

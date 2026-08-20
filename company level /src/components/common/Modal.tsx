@@ -1,5 +1,12 @@
-import React, { useEffect } from 'react';
-import { X } from 'lucide-react';
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+import { cn } from '@/lib/utils';
 
 interface ModalProps {
   isOpen: boolean;
@@ -18,56 +25,30 @@ export const Modal: React.FC<ModalProps> = ({
   children,
   maxWidth = 'md',
 }) => {
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
-    };
-    if (isOpen) {
-      document.body.style.overflow = 'hidden';
-      window.addEventListener('keydown', handleKeyDown);
-    }
-    return () => {
-      document.body.style.overflow = 'unset';
-      window.removeEventListener('keydown', handleKeyDown);
-    };
-  }, [isOpen, onClose]);
-
-  if (!isOpen) return null;
-
   const maxWidthClass = {
-    sm: 'max-w-sm',
-    md: 'max-w-md',
-    lg: 'max-w-lg',
-    xl: 'max-w-xl',
-    '2xl': 'max-w-2xl',
-    '4xl': 'max-w-4xl',
+    sm: 'sm:max-w-sm',
+    md: 'sm:max-w-md',
+    lg: 'sm:max-w-lg',
+    xl: 'sm:max-w-xl',
+    '2xl': 'sm:max-w-2xl',
+    '4xl': 'sm:max-w-4xl',
   }[maxWidth];
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
-      <div
-        className="fixed inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity animate-in fade-in duration-200"
-        onClick={onClose}
-      />
-      {/* DESIGN.md: rounded-xl (16px), hairline border, minimal shadow */}
-      <div
-        className={`relative w-full ${maxWidthClass} bg-white rounded-xl border border-hairline shadow-card overflow-hidden z-10 animate-in zoom-in-95 duration-200`}
-      >
-        {/* Header: card-title size (22px/500/-0.3px) */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-hairline-soft">
-          <div>
-            <h3 className="text-card-title text-ink">{title}</h3>
-            {subtitle && <p className="text-body-sm text-ink-muted mt-0.5">{subtitle}</p>}
-          </div>
-          <button
-            onClick={onClose}
-            className="text-ink-subtle hover:text-ink hover:bg-zinc-100 p-1.5 rounded-md transition-colors"
-          >
-            <X className="h-4 w-4" />
-          </button>
+    <Dialog open={isOpen} onOpenChange={open => !open && onClose()}>
+      <DialogContent className={cn(maxWidthClass, "p-0 overflow-hidden gap-0 border-zinc-200 shadow-lg")}>
+        <DialogHeader className="px-6 py-4 border-b border-zinc-100 bg-white">
+          <DialogTitle className="text-base font-bold tracking-tight text-zinc-900">{title}</DialogTitle>
+          {subtitle && (
+            <DialogDescription className="text-xs text-zinc-500 mt-0.5">
+              {subtitle}
+            </DialogDescription>
+          )}
+        </DialogHeader>
+        <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar bg-white">
+          {children}
         </div>
-        <div className="p-6 max-h-[80vh] overflow-y-auto custom-scrollbar">{children}</div>
-      </div>
-    </div>
+      </DialogContent>
+    </Dialog>
   );
 };
